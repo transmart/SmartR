@@ -41,6 +41,8 @@ window.smartRApp.directive('heatmapPlot', ['smartRUtils', 'rServeService', funct
         var numberOfClusteredRows = data.numberOfClusteredRows[0];
         var warning = data.warnings === undefined ? '' : data.warnings;
         var maxRows = data.maxRows[0];
+        var pdMapLogin = data.pdMapLogin[0];
+        var pdMapPassword = data.pdMapPassword[0];
 
         var rowClustering = true;
         var colClustering = true;
@@ -1028,38 +1030,71 @@ window.smartRApp.directive('heatmapPlot', ['smartRUtils', 'rServeService', funct
                     return 'translate(' + (width + spacing + h - d.y) + ',' + d.x + ')';
                 }).on('click', function (d) {
                     var leafs = d.index.split(' ');
-                    var genes = [];
-                    leafs.each(function (leaf) {
+                    var genes = {};
+                    leafs.forEach(function(leaf) {
                         var uid = uids[leaf];
+                        var idx = uids.indexOf(uid);
+                        var logFoldValue = logfoldValues[idx];
                         var split = uid.split("--");
                         split.shift();
-                        split.each(function (gene) {
-                            genes.push(gene);
+                        split.forEach(function(gene) {
+                            if (!(gene in genes)) {
+                                genes[gene] = logFoldValue;
+                            }
                         });
                     });
-                    $.ajax({
-                        url: 'http://biocompendium.embl.de/cgi-bin/biocompendium.cgi',
-                        type: 'POST',
-                        timeout: '5000',
-                        async: false,
-                        data: {
-                            section: 'upload_gene_lists_general',
-                            primary_org: 'Human',
-                            background: 'whole_genome',
-                            Category1: 'Human',
-                            gene_list_1: 'gene_list_1',
-                            SubCat1: 'hgnc_symbol',
-                            attachment1: genes.join(' ')
+
+                    if (pdMapLink) {
+                        var pdMapInput = 'NAME\tVALUE\n';
+                        for (var gene in genes) {
+                            if (genes.hasOwnProperty(gene)) {
+                                var logFoldValue = genes[gene];
+                                pdMapInput += gene + '\t' + logFoldValue + '\n';
+                            }
                         }
-                    }).done(function (serverAnswer) {
-                        var sessionID = serverAnswer.match(/tmp_\d+/)[0];
-                        var url = 'http://biocompendium.embl.de/' +
-                            'cgi-bin/biocompendium.cgi?section=pathway&pos=0&background=whole_genome&session=' +
-                            sessionID + '&list=gene_list_1__1&list_size=15&org=human';
-                        window.open(url);
-                    }).fail(function () {
-                        alert('An error occurred. Maybe the external resource is unavailable.');
-                    });
+
+                        $.ajax({
+                            url: pageInfo.basePath + '/SmartR/createPDMapLayout',
+                            type: 'POST',
+                            timeout: '10000',
+                            async: false,
+                            data: {
+                                identifier: Math.floor((Math.random() * 9999999) + 1000000),
+                                login: pdMapLogin,
+                                password: pdMapPassword,
+                                model: 'pdmap_dec15',
+                                expression_value: pdMapInput
+                            }
+                        }).done(function (response) {
+                            window.open(response);
+                        }).fail(function () {
+                            alert('An error occurred. Maybe the external resource is unavailable.');
+                        });
+                    } else {
+                        $.ajax({
+                            url: 'http://biocompendium.embl.de/cgi-bin/biocompendium.cgi',
+                            type: 'POST',
+                            timeout: '10000',
+                            async: false,
+                            data: {
+                                section: 'upload_gene_lists_general',
+                                primary_org: 'Human',
+                                background: 'whole_genome',
+                                Category1: 'Human',
+                                gene_list_1: 'gene_list_1',
+                                SubCat1: 'hgnc_symbol',
+                                attachment1: Object.keys(genes).join(' ')
+                            }
+                        }).done(function (serverAnswer) {
+                            var sessionID = serverAnswer.match(/tmp_\d+/)[0];
+                            var url = 'http://biocompendium.embl.de/' +
+                                'cgi-bin/biocompendium.cgi?section=pathway&pos=0&background=whole_genome&session=' +
+                                sessionID + '&list=gene_list_1__1&list_size=15&org=human';
+                            window.open(url);
+                        }).fail(function () {
+                            alert('An error occurred. Maybe the external resource is unavailable.');
+                        });
+                    }
                 })
                 .on('mouseover', function (d) {
                     tooltip

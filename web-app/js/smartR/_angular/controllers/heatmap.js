@@ -35,7 +35,9 @@ window.smartRApp.controller('HeatmapController',
             params: {
                 max_row : 100,
                 sorting : 'nodes',
-                ranking : 'coef'
+                ranking : 'coef',
+                pdMapLogin: '',
+                pdMapPassword: ''
             },
             subsets : 0,
             scriptResults : {}

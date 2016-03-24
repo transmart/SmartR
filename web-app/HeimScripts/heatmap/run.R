@@ -14,7 +14,7 @@ source(limmaUtils)
 SUBSET1REGEX <- "_s1$"  # Regex identifying columns of subset 1.
 markerTableJson <- "markerSelectionTable.json" # Name of the json file with limma outputs
 
-main <- function(max_rows = 100, sorting = "nodes", ranking = "coef") {
+main <- function(max_rows = 100, sorting = "nodes", ranking = "coef", pdMapLogin = "", pdMapPassword = "") {
     max_rows <- as.numeric(max_rows)
     verifyInput(max_rows, sorting)
     df <- parseInput()
@@ -50,6 +50,8 @@ main <- function(max_rows = 100, sorting = "nodes", ranking = "coef") {
         "features"           = features,
         "extraFields"        = extraFields,
         "maxRows"            = max_rows,
+        "pdMapLogin"         = pdMapLogin,
+        "pdMapPassword"      = pdMapPassword,
         "warnings"           = c() # initiate empty vector
     )
     writeRunParams(max_rows, sorting, ranking)

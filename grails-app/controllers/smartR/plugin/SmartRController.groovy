@@ -59,7 +59,7 @@ class SmartRController {
         render servletContext.contextPath + pluginContextPath as String;
     }
 
-    def getIPAView = {
-        params
+    def createPDMapLayout = {
+        
     }
 }
