@@ -1,21 +1,20 @@
-<div class="heim-input-field sr-input-area">
+<div class="heim-input-field">
     <h2>Dendrogram Node Functionality:</h2>
     <fieldset class="heim-radiogroup">
         <label>
-            <input type="radio" ng-model="pdMapLinkEnabled" name="sortingSelect" value="true"
-                   checked> Link SmartR to PDMap
+            <input type="radio" ng-model="enabled" id="sr-pdMapSelect" ng-value="true"> Link to PD-Map
         </label>
         <label>
-            <input type="radio" ng-model="pdMapLinkEnabled" name="sortingSelect" value="false">
-            Link SmartR to Biocompendium
+            <input type="radio" ng-model="enabled" id="sr-biocompendiumSelect" ng-value="false"> Link to Biocompendium
         </label>
     </fieldset>
+
+    <div id="sr-pdmap-credentials">
+        <label for="sr-pdmap-login">PD-Map Login:</label>
+        <input type="text" id="sr-pdmap-login" ng-model="login"/><br/>
+        <label for="sr-pdmap-password">PD-Map Password:</label>
+        <input type="text" id="sr-pdmap-password" ng-model="password"/>
+    </div>
 </div>
 
-<h2>PDMap Link:</h2>
-<div ng-disabled="subsets < 2 || criteria.indexOf(['ttest', 'pval', 'adjpval', 'bval', 'logfold']) === -1">
-    <label for="sr-pdmap-login">PDMapLogin:</label>
-    <input type="text" id="sr-pdmap-login" ng-model="login"/><br/>
-    <label for="sr-pdmap-password">PDMapPassword:</label>
-    <input type="text" id="sr-pdmap-password" ng-model="password"/>
-</div>
+

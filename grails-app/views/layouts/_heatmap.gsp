@@ -104,17 +104,17 @@
             </div>
 
             %{--Link to Biocompendium or PDMap--}%
-            <div class="heim-input-field  sr-input-area">
+            <div class="heim-input-field sr-input-area">
                 <pd-map-login criteria="runAnalysis.params.ranking"
                             subsets="runAnalysis.subsets"
                             login="runAnalysis.params.pdMapLogin"
                             password="runAnalysis.params.pdMapPassword"
-                            pdMapLinkEnabled="runAnalysis.params.pdMapLinkEnabled">
+                            enabled="runAnalysis.params.pdMapLinkEnabled">
                 </pd-map-login>
             </div>
 
             %{--Type of sorting to apply--}%
-            <div class="heim-input-field  sr-input-area">
+            <div class="heim-input-field sr-input-area">
                 <sorting-criteria criteria="runAnalysis.params.ranking" subsets="runAnalysis.subsets">
                 </sorting-criteria>
             </div>

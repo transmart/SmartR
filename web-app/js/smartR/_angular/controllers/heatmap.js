@@ -37,8 +37,8 @@ window.smartRApp.controller('HeatmapController',
                 sorting : 'nodes',
                 ranking : 'coef',
                 pdMapLinkEnabled: false,
-                pdMapLogin: '',
-                pdMapPassword: ''
+                pdMapLogin: 'Enter Login',
+                pdMapPassword: 'Enter Password'
             },
             subsets : 0,
             scriptResults : {}
