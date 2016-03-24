@@ -36,6 +36,7 @@ window.smartRApp.controller('HeatmapController',
                 max_row : 100,
                 sorting : 'nodes',
                 ranking : 'coef',
+                pdMapLinkEnabled: false,
                 pdMapLogin: '',
                 pdMapPassword: ''
             },

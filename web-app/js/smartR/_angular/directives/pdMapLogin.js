@@ -1,7 +1,5 @@
 //# sourceURL=pdMapLogin.js
 
-'use strict';
-
 window.smartRApp.directive('pdMapLogin', ['$rootScope', function($rootScope) {
     return {
         restrict: 'E',
@@ -9,7 +7,8 @@ window.smartRApp.directive('pdMapLogin', ['$rootScope', function($rootScope) {
             criteria: '=',
             subsets : '=',
             login: '=',
-            password: '='
+            password: '=',
+            pdMapLinkEnabled: '='
         },
         templateUrl: $rootScope.smartRPath +  '/js/smartR/_angular/templates/pdMapLogin.html'
     }

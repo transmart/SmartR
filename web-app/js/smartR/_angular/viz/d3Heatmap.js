@@ -41,6 +41,7 @@ window.smartRApp.directive('heatmapPlot', ['smartRUtils', 'rServeService', funct
         var numberOfClusteredRows = data.numberOfClusteredRows[0];
         var warning = data.warnings === undefined ? '' : data.warnings;
         var maxRows = data.maxRows[0];
+        var pdMapLinkEnabled = data.pdMapLinkEnabled[0];
         var pdMapLogin = data.pdMapLogin[0];
         var pdMapPassword = data.pdMapPassword[0];
 
@@ -1044,7 +1045,7 @@ window.smartRApp.directive('heatmapPlot', ['smartRUtils', 'rServeService', funct
                         });
                     });
 
-                    if (pdMapLink) {
+                    if (pdMapLinkEnabled) {
                         var pdMapInput = 'NAME\tVALUE\n';
                         for (var gene in genes) {
                             if (genes.hasOwnProperty(gene)) {
