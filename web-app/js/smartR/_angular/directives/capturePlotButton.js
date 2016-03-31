@@ -1,6 +1,6 @@
 //# sourceURL=capturePlotButton.js
 
-window.smartRApp.directive('capturePlotButton', ['processService', function(processService) {
+window.smartRApp.directive('capturePlotButton', [function() {
 
     // aux for downloadSVG
     var copyWithCollapsedCSS = function(svgElement) {
@@ -74,12 +74,11 @@ window.smartRApp.directive('capturePlotButton', ['processService', function(proc
         link: function(scope, elements) {
 
             var template_btn = elements.children()[0];
-            template_btn.disabled = true;
-            processService.registerComponent(scope, 'captureButton');
+            template_btn.disabled = scope.disabled;
 
             scope.$watch('disabled', function (newValue) {
-                template_btn.disabled = Boolean(newValue);
-            });
+                template_btn.disabled = newValue;
+            }, true);
 
             if (!scope.filename) {
                 // default filename

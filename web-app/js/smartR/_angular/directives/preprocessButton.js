@@ -1,7 +1,7 @@
 //# sourceURL=preprocessButton.js
 
-window.smartRApp.directive('preprocessButton', ['rServeService', 'processService',
-    function(rServeService, processService) {
+window.smartRApp.directive('preprocessButton', ['rServeService',
+    function(rServeService) {
     return {
         restrict: 'E',
         scope: {
@@ -19,18 +19,24 @@ window.smartRApp.directive('preprocessButton', ['rServeService', 'processService
             var template_msg = element.children()[1];
 
             template_btn.disabled = scope.disabled;
-            processService.registerComponent(scope,  'preprocessButton');
-            
+
             scope.$watch('disabled', function (newValue) {
                 template_btn.disabled = newValue;
+            }, true);
+
+            scope.$watch('summaryData', function (newSummaryData) {
+                if (newSummaryData.hasOwnProperty('allSamples')) {
+                    // when everything is retrieved
+                    scope.disabled = false;
+                }
             }, true);
 
             template_btn.onclick = function() {
 
                 var _init = function () {
-                        template_btn.disabled = true;
+                        scope.summaryData = {}; // reset
+                        scope.disabled = true;
                         template_msg.innerHTML = 'Preprocessing, please wait <span class="blink_me">_</span>';
-                        processService.onPreprocessing(true);
                     },
 
                     _args = {aggregate:scope.params.aggregateProbes},
@@ -43,8 +49,7 @@ window.smartRApp.directive('preprocessButton', ['rServeService', 'processService
 
                     _finishedPreprocessed = function (msg) {
                         template_msg.innerHTML = 'Success: ' + msg;
-                        template_btn.disabled = false;
-                        processService.onPreprocessing(false);
+                        scope.disabled = false;
                     },
 
                     _afterDataPreprocessed = function (msg) {
@@ -54,17 +59,12 @@ window.smartRApp.directive('preprocessButton', ['rServeService', 'processService
                         template_msg.innerHTML = 'Execute summary statistics, please wait <span class="blink_me">_</span>';
 
                         return  rServeService.executeSummaryStats('preprocess')
-                            .then (function(data) {
+                            .then (function (data) {
                                 scope.summaryData = data.result;
                                 template_msg.innerHTML = 'Success: ' + data.msg;
-                            },
-                            function(msg) {
+                            }, function(msg) {
                                 template_msg.innerHTML = 'Failure: ' + msg;
                             })
-                            .finally(function () {
-                                processService.onPreprocessing(false);
-                                template_btn.disabled = false;
-                            });
                     };
 
                 _init();

@@ -6,51 +6,33 @@
         %{-- Fetch Data --}%
         %{--========================================================================================================--}%
         <workflow-tab tab-name="Fetch Data">
+            <concept-box
+                concept-group="fetch.conceptBoxes.highDimensional"
+                type="HD"
+                min="1"
+                max="512"
+                label="High Dimensional"
+                tooltip="Select high dimensional data node(s) from the Data Set Explorer Tree and drag it into the box.
+                The nodes needs to be from the same platform.">
+            </concept-box>
 
-            <table>
-                <tr>
-                    <td>
-                        <concept-box concept-group="fetch.conceptBoxes.highDimensional"
-                                     type="HD"
-                                     min="1"
-                                     max="-1"
-                                     label="High Dimensional Variables"
-                                     tooltip="Select high dimensional data node(s) from the Data Set Explorer Tree and drag it into the box. The nodes needs to be from the same platform.">
-                        </concept-box>
-                    </td>
-                    %{--<td>--}%
-                        %{--<concept-box concept-group="fetch.conceptBoxes.numerical"--}%
-                                     %{--type="LD-numerical"--}%
-                                     %{--min="0"--}%
-                                     %{--max="-1"--}%
-                                     %{--label="(optional) Numerical Variables"--}%
-                                     %{--tooltip="Select an arbitrary number of numerical variables to expand the heatmap with low dimensional data.">--}%
-                        %{--</concept-box>--}%
-                    %{--</td>--}%
-                    %{--<td>--}%
-                        %{--<concept-box concept-group="fetch.conceptBoxes.categorical"--}%
-                                     %{--type="LD-categorical"--}%
-                                     %{--min="0"--}%
-                                     %{--max="-1"--}%
-                                     %{--label="(optional) Categorical Variables"--}%
-                                     %{--tooltip="Select an arbitrary number of categorical variables to expand the heatmap with low dimensional data.">--}%
-                        %{--</concept-box>--}%
-                    %{--</td>--}%
-                </tr>
-            </table>
-
+            %{--TODO include low dimensions--}%
+            %{--<concept-box concept-group="fetch.conceptBoxes.numerical"></concept-box>--}%
+            %{--<concept-box concept-group="fetch.conceptBoxes.categorical"></concept-box>--}%
 
             <biomarker-selection biomarkers="fetch.selectedBiomarkers"></biomarker-selection>
             <hr class="sr-divider">
             <fetch-button
-                    disabled="fetch.disabled"
+                    disabled="fetch.btn.disabled"
                     concept-map="fetch.conceptBoxes"
                     biomarkers="fetch.selectedBiomarkers"
                     show-summary-stats="true"
-                    summary-data="fetch.summaryData">
+                    summary-data="fetch.scriptResults"
+                    all-samples="fetch.totalSamples"
+                    subsets="fetch.subsets">
             </fetch-button>
             <br/>
-            <summary-stats summary-data="fetch.summaryData"></summary-stats>
+            <summary-stats summary-data="fetch.scriptResults"></summary-stats>
         </workflow-tab>
 
         %{--========================================================================================================--}%
@@ -67,12 +49,12 @@
 
             <preprocess-button params="preprocess.params"
                                show-summary-stats="true"
-                               summary-data="preprocess.summaryData"
-                               disabled="preprocess.disabled">
+                               summary-data="preprocess.scriptResults"
+                               disabled="preprocess.btn.disabled">
             </preprocess-button>
 
             <br/>
-            <summary-stats summary-data="preprocess.summaryData"></summary-stats>
+            <summary-stats summary-data="preprocess.scriptResults"></summary-stats>
         </workflow-tab>
 
 
@@ -126,12 +108,12 @@
                         script-to-run="run"
                         arguments-to-use="runAnalysis.params"
                         serialized="true"
-                        disabled="runAnalysis.disabled">
+                        disabled="runAnalysis.btn.disabled">
             </run-button>
             <capture-plot-button filename="heatmap.svg" disabled="runAnalysis.download.disabled"></capture-plot-button>
             <download-results-button disabled="runAnalysis.download.disabled"></download-results-button>
             <br/>
-            <heatmap-plot data="runAnalysis.scriptResults" width="1200" height="1200"></heatmap-plot>
+            <heatmap-plot data="runAnalysis.scriptResults" width="1200" height="1200" params="runAnalysis.params"></heatmap-plot>
 
         </workflow-tab>
 

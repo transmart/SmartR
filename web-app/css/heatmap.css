@@ -64,6 +64,10 @@
     fill-opacity: 0.2;
 }
 
+.sortedBy {
+    stroke: red;
+}
+
 .uid {
     font-size: 12pt;
 }

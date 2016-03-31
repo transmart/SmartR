@@ -159,7 +159,7 @@ div.sr-status-and-output-container:empty:before {
 .heim-input-field label  {display: inline-table;width: 15em;height: 1.7em;}
 .heim-input-field input[type='text']  {display: inline-table;width: 15em; height: 1.5em; padding: 2px;}
 .heim-radiogroup {padding: .5em; border-radius: .5em; background-color: #EEE; border:none; margin: .5em 0 0 .5em; }
-.heim-radiogroup label {display: inline;}
+.heim-radiogroup label {display: inline; padding-left: 5px}
 .heim-radiogroup div {display: block; margin-bottom: .5em}
 .heim-input-field-sub {float:left;}
 .heim-input-field-sub h3 {text-decoration: underline; font-weight: 100;}
@@ -179,56 +179,6 @@ div.sr-status-and-output-container:empty:before {
 }
 .sr-summary-table th {
     background-color: #efefef;;
-}
-
-
-/* custom dropdown menu for index.gsp */
-
-.sr-landing-dropBtn {
-    background-color: #3B5E94;
-    color: white;
-    padding: 16px;
-    font-size: 16px;
-    border: none;
-}
-
-/* The container <div> - needed to position the dropdown content */
-.sr-landing-dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-/* Dropdown Content (Hidden by Default) */
-.sr-landing-dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 172px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-}
-
-/* Links inside the dropdown */
-.sr-landing-dropdown-content span {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    cursor: pointer;
-}
-
-/* Change color of dropdown links on hover */
-.sr-landing-dropdown-content span:hover {
-    background-color: #f1f1f1
-}
-
-/* Show the dropdown menu on hover */
-.sr-landing-dropdown:hover .sr-landing-dropdown-content {
-    display: block;
-}
-
-/* Change the background color of the dropdown button when the dropdown content is shown */
-.sr-landing-dropdown:hover .sr-landing-dropBtn {
-    background-color: #3B5E94;
 }
 
 .sr-instruction {

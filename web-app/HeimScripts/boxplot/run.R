@@ -1,10 +1,10 @@
 
 main <- function( excludedPatientIDs = integer() ) {
-    datapoints <- parse.input(sourceLabel="datapoints", loaded_variables=loaded_variables, type="numeric")
+    datapoints <- parse.input(sourceLabel="datapoints", loaded_variables=loaded_variables, type="numerical")
     datapoints <- na.omit(datapoints)
     colnames(datapoints)[2] <- 'value'
 
-    subsets <- parse.input(sourceLabel="subsets", loaded_variables=loaded_variables, type="categoric")
+    subsets <- parse.input(sourceLabel="subsets", loaded_variables=loaded_variables, type="categorical")
 
     if (nrow(subsets) > 0) {
         df <- merge(datapoints, subsets, by="patientID")

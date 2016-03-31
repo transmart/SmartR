@@ -355,7 +355,7 @@ window.smartRApp.factory('rServeService', ['smartRUtils', '$q', '$http', functio
                     // The variable results needs var in this case (without 'var' a global variable is created)
                     var results = [];
                     for (var i = 0; i < array.length; i++) {
-                        if (array[i].indexOf(key) > -1) {
+                        if (array[i].search(key) > -1) {
                             results.push(array[i]);
                         }
                     }

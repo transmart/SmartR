@@ -3,7 +3,7 @@
 'use strict';
 
 window.smartRApp.directive('runButton',
-    ['$rootScope', 'rServeService', 'processService', function($rootScope, rServeService, processService) {
+    ['$rootScope', 'rServeService', function($rootScope, rServeService) {
         return {
             restrict: 'E',
             scope: {
@@ -22,12 +22,10 @@ window.smartRApp.directive('runButton',
                     serialized = scope.serialized;
 
                 template_btn.disabled = scope.disabled;
-                processService.registerComponent(scope, 'runButton');
 
                 scope.$watch('disabled', function (newValue) {
                     template_btn.disabled = newValue;
                 }, true);
-
 
                 var _successCreatePlot = function (response) {
                     template_msg.innerHTML = ''; // empty template
@@ -36,29 +34,26 @@ window.smartRApp.directive('runButton',
                         rServeService.downloadJsonFile(response.executionId, 'heatmap.json').then(
                             function (d) {
                                 scope.storage = d.data;
+                                scope.disabled = false;
                             }
                         );
                     } else { // results
                         scope.storage = JSON.parse(response.result.artifacts.value);
+                        scope.disabled = false;
                     }
                 };
 
                 var _failCreatePlot = function (response) {
                     template_msg.style.color = 'red';
                     template_msg.innerHTML = 'Failure: ' + response.statusText;
-                };
-
-                var _finishedRunning =  function() {
-                    template_btn.disabled = false;
-                    processService.onRunning(false);
+                    scope.disabled = false;
                 };
 
                 template_btn.onclick = function() {
 
                     scope.storage = {};
-                    template_btn.disabled = true;
+                    scope.disabled = true;
                     template_msg.innerHTML = 'Creating plot, please wait <span class="blink_me">_</span>';
-                    processService.onRunning(true);
 
                     rServeService.startScriptExecution({
                         taskType: scope.script,
@@ -66,8 +61,6 @@ window.smartRApp.directive('runButton',
                     }).then(
                         _successCreatePlot,
                         _failCreatePlot
-                    ).finally(
-                        _finishedRunning
                     );
                 };
             }

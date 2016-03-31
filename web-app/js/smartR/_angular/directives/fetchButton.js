@@ -3,16 +3,18 @@
 'use strict';
 
 window.smartRApp.directive('fetchButton',
-    ['$rootScope', 'rServeService', 'smartRUtils', 'processService',
-        function($rootScope, rServeService, smartRUtils, processService) {
+    ['$rootScope', 'rServeService', 'smartRUtils',
+        function($rootScope, rServeService, smartRUtils) {
         return {
             restrict: 'E',
             scope: {
                 disabled: '=',
                 conceptMap: '=',
-                biomarkers: '=',
-                showSummaryStats: '=',
-                summaryData: '='
+                biomarkers: '=?',
+                showSummaryStats: '=?',
+                summaryData: '=?',
+                allSamples: '=?',
+                subsets: '=?'
             },
             templateUrl: $rootScope.smartRPath +  '/js/smartR/_angular/templates/fetchButton.html',
             link: function(scope, element) {
@@ -22,27 +24,29 @@ window.smartRApp.directive('fetchButton',
 
                 template_btn.disabled = scope.disabled;
 
-                processService.registerComponent(scope, 'fetchButton');
-
                 scope.$watch('disabled', function (newValue) {
                     template_btn.disabled = newValue;
                 }, true);
 
-                scope.$watch('summaryData', function (newSummaryData) {
-                    if (newSummaryData.hasOwnProperty('allSamples')) {
-                        // when everything is retrieved
-                        processService.onFetching(false, processService.status.SUCCESS);
-                        template_btn.disabled = false;
-                    }
-                }, true);
+                if (angular.isDefined(scope.summaryData)) {
+                    scope.$watch('summaryData', function (newSummaryData) {
+                        if (newSummaryData.hasOwnProperty('allSamples')) {
+                            // when everything is retrieved
+                            scope.allSamples = newSummaryData.allSamples;
+                            scope.subsets = newSummaryData.subsets;
+                            scope.disabled = false;
+                        }
+                    }, true);
+                }
 
                 template_btn.onclick = function() {
 
                     var _init = function () {
                             scope.summaryData = {}; // reset
-                            template_btn.disabled = true;
+                            scope.allSamples = 0;
+                            scope.subsets = 0;
+                            scope.disabled = true;
                             template_msg.innerHTML = 'Fetching data, please wait <span class="blink_me">_</span>';
-                            processService.onFetching(true);
                         },
 
                         _getDataConstraints = function (biomarkers) {
@@ -67,8 +71,7 @@ window.smartRApp.directive('fetchButton',
 
                         _finishedFetching = function (msg) {
                             template_msg.innerHTML = 'Success: ' + msg;
-                            template_btn.disabled = false;
-                            processService.onFetching(false);
+                            scope.disabled = false;
                         },
 
                         _afterDataFetched = function (msg) {
@@ -86,8 +89,7 @@ window.smartRApp.directive('fetchButton',
                                     template_msg.innerHTML = 'Success: ' + data.msg;
                                 }, function(msg) {
                                     template_msg.innerHTML = 'Failure: ' + msg;
-                                    processService.onFetching(false);
-                                    template_btn.disabled = false;
+                                    scope.disabled = false;
                                 })
                         },
                         conceptKeys = smartRUtils.conceptBoxMapToConceptKeys(scope.conceptMap),

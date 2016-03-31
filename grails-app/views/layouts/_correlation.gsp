@@ -25,7 +25,8 @@
                 <br/>
                 <br/>
                 <fetch-button concept-map="conceptBoxes"
-                              show-summary-stats="false">
+                              show-summary-stats="false"
+                                disabled="false">
                 </fetch-button>
             </workflow-tab>
 
@@ -42,7 +43,8 @@
                             store-results-in="scriptResults"
                             script-to-run="run"
                             arguments-to-use="params"
-                            serialized="false">
+                            serialized="false"
+                            disabled="false">
                 </run-button>
                 <br/>
                 <br/>
