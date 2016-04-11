@@ -1141,11 +1141,13 @@ window.smartRApp.directive('heatmapPlot', ['smartRUtils', 'rServeService', funct
                         }
 
                         $.ajax({
-                            url: pageInfo.basePath + '/SmartR/createPDMapLayout',
+                            url: pageInfo.basePath + '/SmartR/createMinervaLayout',
                             type: 'POST',
                             timeout: '10000',
                             async: false,
                             data: {
+                                // NOTE use a hash (eg. sha1) of pdMapInput as identifier
+                                // to avoid duplication of the same map?
                                 identifier: Math.floor((Math.random() * 9999999) + 1000000),
                                 login: pdMapLogin,
                                 password: pdMapPassword,
@@ -1153,7 +1155,15 @@ window.smartRApp.directive('heatmapPlot', ['smartRUtils', 'rServeService', funct
                                 expression_value: pdMapInput
                             }
                         }).done(function (response) {
-                            window.open(response);
+                            if (response['success']) {
+                                console.log('call to createMinervaLayout on '+response['url']+' was successful');
+                                // NOTE the content returned by MINERVA is the status embedded in plain html
+                                // getting a direct link to the created map is more involved
+                                //window.open(response['rawData']);
+                            } else {
+                                // show error message
+                                console.log('no success');
+                            }
                         }).fail(function () {
                             alert('An error occurred. Maybe the external resource is unavailable.');
                         });
