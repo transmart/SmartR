@@ -5,9 +5,9 @@
 
         <tab-container>
 
-            <workflow-tab tab-name="Fetch Data">
+            <workflow-tab tab-name="Fetch Data" disabled="fetch.disabled">
                 <concept-box style="display: inline-block"
-                             concept-group="conceptBoxes.datapoints"
+                             concept-group="fetch.conceptBoxes.datapoints"
                              type="LD-numerical"
                              min="2"
                              max="2"
@@ -15,7 +15,7 @@
                              tooltip="Select two numerical variables from the tree to compare them.">
                 </concept-box>
                 <concept-box style="display: inline-block;"
-                             concept-group="conceptBoxes.annotations"
+                             concept-group="fetch.conceptBoxes.annotations"
                              type="LD-categorical"
                              min="0"
                              max="-1"
@@ -24,31 +24,38 @@
                 </concept-box>
                 <br/>
                 <br/>
-                <fetch-button concept-map="conceptBoxes"
-                              show-summary-stats="false"
-                                disabled="false">
+                <fetch-button concept-map="fetch.conceptBoxes"
+                              loaded="fetch.loaded"
+                              running="fetch.running">
                 </fetch-button>
             </workflow-tab>
 
-            <workflow-tab tab-name="Run Analysis">
-                <select ng-model="params.method">
-                    <option value="pearson">Pearson (Default)</option>
-                    <option value="kendall">Kendall</option>
-                    <option value="spearman">Spearman</option>
-                </select>
-
+            <workflow-tab tab-name="Run Analysis" disabled="runAnalysis.disabled">
+                <div class="heim-input-field sr-input-area">
+                    <h2>Correlation computation method:</h2>
+                    <fieldset class="heim-radiogroup">
+                        <label>
+                            <input type="radio" ng-model="runAnalysis.params.method" name="sortingSelect" value="pearson" checked> Pearson
+                        </label>
+                        <label>
+                            <input type="radio" ng-model="runAnalysis.params.method" name="sortingSelect" value="kendall"> Kendall
+                        </label>
+                        <label>
+                            <input type="radio" ng-model="runAnalysis.params.method" name="sortingSelect" value="spearman"> Spearman
+                        </label>
+                    </fieldset>
+                </div>
                 <br/>
                 <br/>
                 <run-button button-name="Create Plot"
-                            store-results-in="scriptResults"
+                            store-results-in="runAnalysis.scriptResults"
                             script-to-run="run"
-                            arguments-to-use="params"
-                            serialized="false"
-                            disabled="false">
+                            arguments-to-use="runAnalysis.params"
+                            running="runAnalysis.running">
                 </run-button>
                 <br/>
                 <br/>
-                <correlation-plot data="scriptResults" width="1500" height="1500"></correlation-plot>
+                <correlation-plot data="runAnalysis.scriptResults" width="1500" height="1500"></correlation-plot>
             </workflow-tab>
 
         </tab-container>

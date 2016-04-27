@@ -49,6 +49,17 @@ window.smartRApp.factory('smartRUtils', ['$q', function($q) {
         }).max();
     };
 
+    /**
+     * Executes callback with scroll position when SmartR mainframe is scrolled
+     * @param function
+     */
+    service.callOnScroll = function(callback) {
+        $('#sr-index').parent().scroll(function() { 
+            var scrollPos = $(this).scrollTop();
+            callback(scrollPos);
+        });
+    };
+
     service.countCohorts = function() {
         return !window.isSubsetEmpty(1) + !window.isSubsetEmpty(2);
     };

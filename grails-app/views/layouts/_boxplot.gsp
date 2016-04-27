@@ -5,9 +5,9 @@
 
     <tab-container>
 
-        <workflow-tab tab-name="Fetch Data">
+        <workflow-tab tab-name="Fetch Data" disabled="fetch.disabled">
             <concept-box style="display: inline-block;"
-                         concept-group="conceptBoxes.datapoints"
+                         concept-group="fetch.conceptBoxes.datapoints"
                          type="LD-numerical"
                          min="1"
                          max="1"
@@ -17,7 +17,7 @@
             %{--Nice idea but somehow lost it's initial purpose because cross-study support is gone.
                 Maybe implement later--}%
             %{--<concept-box style="display: inline-block;"--}%
-                         %{--concept-group="conceptBoxes.subsets"--}%
+                         %{--concept-group="fetch.conceptBoxes.subsets"--}%
                          %{--type="LD-categorical"--}%
                          %{--min="0"--}%
                          %{--max="-1"--}%
@@ -26,22 +26,24 @@
             %{--</concept-box>--}%
             <br/>
             <br/>
-            <fetch-button concept-map="conceptBoxes" show-summary-stats="false" disabled="false"></fetch-button>
+            <fetch-button concept-map="fetch.conceptBoxes"
+                          loaded="fetch.loaded"
+                          running="fetch.running">
+            </fetch-button>
         </workflow-tab>
 
-        <workflow-tab tab-name="Run Analysis">
+        <workflow-tab tab-name="Run Analysis" disabled="runAnalysis.disabled">
             <br/>
             <br/>
             <run-button button-name="Create Plot"
-                        store-results-in="scriptResults"
+                        store-results-in="runAnalysis.scriptResults"
                         script-to-run="run"
-                        arguments-to-use="params"
-                        serialized="false"
-                        disabled="false">
+                        arguments-to-use="runAnalysis.params"
+                        running="runAnalysis.running">
             </run-button>
             <br/>
             <br/>
-            <boxplot data="scriptResults" width="1000" height="500"></boxplot>
+            <boxplot data="runAnalysis.scriptResults" width="1000" height="500"></boxplot>
         </workflow-tab>
 
     </tab-container>
