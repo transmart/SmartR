@@ -16,6 +16,8 @@ window.smartRApp.directive('conceptBox', ['$rootScope', function($rootScope) {
         },
         templateUrl: $rootScope.smartRPath +  '/js/smartR/_angular/templates/conceptBox.html',
         link: function(scope, element) {
+            var max = parseInt(scope.max);
+            var min = parseInt(scope.min);
 
             var template_box = element[0].querySelector('.sr-drop-input'),
                 template_btn = element[0].querySelector('.sr-drop-btn'),
@@ -25,7 +27,7 @@ window.smartRApp.directive('conceptBox', ['$rootScope', function($rootScope) {
             $(template_tooltip).tooltip({track: true, tooltipClass:"sr-ui-tooltip"});
 
             var _clearWindow = function() {
-                $(template_box).children().remove()
+                $(template_box).children().remove();
             };
 
             var _getConcepts = function() {
@@ -37,7 +39,7 @@ window.smartRApp.directive('conceptBox', ['$rootScope', function($rootScope) {
             var _activateDragAndDrop = function() {
                 var extObj = Ext.get(template_box);
                 var dtgI = new Ext.dd.DropTarget(extObj, {ddGroup: 'makeQuery'});
-                dtgI.notifyDrop = dropOntoCategorySelection;
+                dtgI.notifyDrop = dropOntoCategorySelection; // jshint ignore:line
             };
 
             var typeMap = {
@@ -63,18 +65,20 @@ window.smartRApp.directive('conceptBox', ['$rootScope', function($rootScope) {
 
             // this watches the childNodes of the conceptBox and updates the model on change
             new MutationObserver(function() {
-                scope.conceptGroup = _getConcepts(); // update the model
+                scope.conceptGroup.concepts = _getConcepts(); // update the model
                 scope.$apply();
             }).observe(template_box, { childList: true });
 
             scope.$watch('conceptGroup', scope.validate);
 
             scope.validate = function() {
-                scope.instructionMinNodes = scope.conceptGroup.length < scope.min;
-                scope.instructionMaxNodes = ~scope.max && scope.conceptGroup.length > scope.max;
+                scope.instructionMinNodes = scope.conceptGroup.concepts.length < min;
+                scope.instructionMaxNodes = max !== -1 && scope.conceptGroup.concepts.length > max;
                 scope.instructionNodeType = !_containsOnly();
-                return !(scope.instructionMinNodes || scope.instructionMaxNodes || scope.instructionNodeType);
-            }
+                var valid = !(scope.instructionMinNodes || scope.instructionMaxNodes || scope.instructionNodeType);
+                scope.conceptGroup.valid = valid;
+                return valid;
+            };
         }
     };
 }]);

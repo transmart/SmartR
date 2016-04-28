@@ -17,9 +17,9 @@ window.smartRApp.controller('HeatmapController', [
             running: false,
             loaded: false,
             conceptBoxes: {
-                highDimensional: [],
-                numerical: [],
-                categorical: []
+                highDimensional: {concepts: [], valid: false},
+                numerical: {concepts: [], valid: true},
+                categorical: {concepts: [], valid: true}
             },
             selectedBiomarkers: [],
             scriptResults: {}
@@ -46,7 +46,8 @@ window.smartRApp.controller('HeatmapController', [
             params: {
                 max_row: 100,
                 sorting: 'nodes',
-                ranking: 'coef'
+                ranking: 'coef',
+                geneCardsAllowed: false,
             },
             download: {
                 disabled: true

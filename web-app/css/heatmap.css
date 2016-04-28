@@ -66,6 +66,12 @@
 
 .uid {
     font-size: 12pt;
+    cursor: pointer;
+}
+
+.uid:hover {
+    fill: blue;
+    text-decoration: underline;
 }
 
 .selectText {

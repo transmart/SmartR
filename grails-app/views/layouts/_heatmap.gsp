@@ -87,6 +87,26 @@
                 </fieldset>
             </div>
 
+            <div class="heim-input-field sr-input-area">
+                <h2>I have read and accept the <a href=http://www.lifemapsc.com/genecards-suite-terms-of-use/ target="_blank">
+                    GeneCards TOU</a>
+                </h2>
+                <fieldset class="heim-radiogroup">
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.geneCardsAllowed"
+                               name="geneCardsAllowedSelect"
+                               ng-value="true"> yes
+                    </label>
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.geneCardsAllowed"
+                               name="geneCardsAllowedSelect"
+                               ng-value="false" checked> no
+                    </label>
+                </fieldset>
+            </div>
+
             %{--Type of sorting to apply--}%
             <div class="heim-input-field  sr-input-area">
                 <sorting-criteria criteria="runAnalysis.params.ranking"

@@ -1,5 +1,7 @@
 //# sourceURL=capturePlotButton.js
 
+'use strict';
+
 window.smartRApp.directive('capturePlotButton', [function() {
 
     // aux for downloadSVG
@@ -35,10 +37,10 @@ window.smartRApp.directive('capturePlotButton', [function() {
                 var effectiveStyle = computedStyle.getPropertyValue(property);
                 var defaultStyle = getDefaultsForElement(jqElem).getPropertyValue(property);
 
-                if (effectiveStyle != defaultStyle) {
+                if (effectiveStyle !== defaultStyle) {
                     jqElem.attr(property, effectiveStyle);
                 }
-            })
+            });
         });
 
         scratchSvg.remove();
@@ -88,7 +90,7 @@ window.smartRApp.directive('capturePlotButton', [function() {
             scope.capture = function() {
                 var svgElement = jQuery('svg.visualization')[0];
                 downloadSVG(svgElement, scope.filename);
-            }
+            };
 
         }
     };

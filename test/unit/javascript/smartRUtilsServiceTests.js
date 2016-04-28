@@ -15,7 +15,11 @@ describe('smartRUtils', function() {
     });
 
     it('has working conceptBoxMapToConceptKeys()', function() {
-        var params = {a: ['c1', 'c2'], 'foo bar __-!*()123 abc': ['c3'], b: [], c: ['12--_- c31/??/*&^/foobar']};
+        var params = {a: {concepts: ['c1', 'c2'], valid: true}, 
+            'foo bar __-!*()123 abc': {concepts: ['c3'], valid: true},
+            b: {concepts: [], valid: true},
+            c: {concepts: ['12--_- c31/??/*&^/foobar'], valid: true}
+        };
         var expected = {a_n0: 'c1', a_n1: 'c2', 'foo bar __-!*()123 abc_n0': 'c3', c_n0: '12--_- c31/??/*&^/foobar'};
         var result = smartRUtils.conceptBoxMapToConceptKeys(params);
         expect(result).toEqual(expected);

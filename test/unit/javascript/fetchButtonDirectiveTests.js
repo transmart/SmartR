@@ -70,7 +70,7 @@ describe('fetchButton', function() {
     });
 
     it('should show another text after data is loaded if showSummaryStats is enabled', function() {
-        _prepareScope(1, true, {foo: ['concept']});
+        _prepareScope(1, true, {foo: {concepts: ['concept'], valid: true}});
         try { // we just want to see if the progress message is there
             _clickButton('resolve()');
         } catch (e) {}
@@ -82,7 +82,7 @@ describe('fetchButton', function() {
     });
 
     it('should have the correct scope when successful without showSummaryStats', function() {
-        _prepareScope(2, false, {foo: ['concept']});
+        _prepareScope(2, false, {foo: {concepts: ['concept'], valid: true}});
         _clickButton('resolve()');
         expect(element.find('span').text()).toBe('Task complete! Go to the "Preprocess" or "Run Analysis" tab to continue.');
         expect(element.isolateScope().running).toBe(false);
@@ -92,7 +92,7 @@ describe('fetchButton', function() {
     });
 
     it('should have the correct scope when successful with showSummaryStats', function() {
-        _prepareScope(1, true, {foo: ['concept']});
+        _prepareScope(1, true, {foo: {concepts: ['concept'], valid: true}});
         _clickButton('resolve()', 'resolve({result: {allSamples: 1337, subsets: null}})');
         expect(element.find('span').text()).toBe('Task complete! Go to the "Preprocess" or "Run Analysis" tab to continue.');
         expect(element.isolateScope().running).toBe(false);
@@ -102,14 +102,21 @@ describe('fetchButton', function() {
     });
 
     it('should show error due to missing cohorts', function() {
-        _prepareScope(0, false, {foo: ['concept']});
+        _prepareScope(0, false, {foo: {concepts: ['concept'], valid: true}});
         _clickButton();
         expect(element.find('span').text()).toBe('Error: No cohorts selected!');
     });
 
     it('should show error due to missing concepts', function() {
-        _prepareScope(1, false, {});
+        _prepareScope(1, false, {foo: {concepts: [], valid: true}});
         _clickButton();
         expect(element.find('span').text()).toBe('Error: No concepts selected!');
     });
+    
+    it('should show error due to invalid concepts', function() {
+        _prepareScope(1, false, {foo: {concepts: [], valid: false}});
+        _clickButton();
+        expect(element.find('span').text()).toBe('Error: Your data do not match the requirements! All fields must be green.');
+    });
 });
+

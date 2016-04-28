@@ -47,7 +47,7 @@ window.smartRApp.directive('heatmapPlot', [
             var numberOfClusteredRows = data.numberOfClusteredRows[0];
             // var warning = data.warnings === undefined ? '' : data.warnings;
             var maxRows = data.maxRows[0];
-
+            var geneCardsAllowed = JSON.parse(params.geneCardsAllowed);
             var rowClustering = true;
             var colClustering = true;
 
@@ -515,6 +515,18 @@ window.smartRApp.directive('heatmapPlot', [
                     .style('text-anchor', 'start')
                     .text(function (d) {
                         return d;
+                    })
+                    .on('click', function(d) {
+                        var genes = d.split('--');
+                        genes.shift();
+                        if (geneCardsAllowed) {
+                            genes.forEach(function(gene) {
+                                var url = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene=' + gene;
+                                window.open(url);
+                            });
+                        } else {
+                            alert('To use this function you have to accept the GeneCards Terms of Use and re-create the plot');
+                        }
                     });
 
                 uid.transition()

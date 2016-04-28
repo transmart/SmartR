@@ -91,6 +91,13 @@ window.smartRApp.directive('fetchButton', [
                         return;
                     }
 
+                    for (var conceptGroup in scope.conceptMap) {
+                        if (scope.conceptMap.hasOwnProperty(conceptGroup) && !scope.conceptMap[conceptGroup].valid) {
+                            _onFailure('Your data do not match the requirements! All fields must be green.');
+                            return;
+                        }
+                    }
+
                     var conceptKeys = smartRUtils.conceptBoxMapToConceptKeys(scope.conceptMap);
                     if ($.isEmptyObject(conceptKeys)) {
                         _onFailure('No concepts selected!');

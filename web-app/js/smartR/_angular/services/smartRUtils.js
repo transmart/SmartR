@@ -9,7 +9,7 @@ window.smartRApp.factory('smartRUtils', ['$q', function($q) {
     service.conceptBoxMapToConceptKeys = function smartRUtils_conceptBoxMapToConceptKeys(conceptBoxMap) {
         var allConcepts = {};
         Object.keys(conceptBoxMap).forEach(function(group) {
-            var concepts = conceptBoxMap[group];
+            var concepts = conceptBoxMap[group].concepts;
             concepts.forEach(function(concept, idx) {
                 allConcepts[group + '_' + 'n' + idx] = concept;
             });
@@ -47,6 +47,17 @@ window.smartRApp.factory('smartRUtils', ['$q', function($q) {
         return selection[0].map(function (d) {
             return d.getBBox().width;
         }).max();
+    };
+
+    /**
+     * Executes callback with scroll position when SmartR mainframe is scrolled
+     * @param function
+     */
+    service.callOnScroll = function(callback) {
+        $('#sr-index').parent().scroll(function() {
+            var scrollPos = $(this).scrollTop();
+            callback(scrollPos);
+        });
     };
 
     service.countCohorts = function() {
