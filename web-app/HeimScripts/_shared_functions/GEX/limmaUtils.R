@@ -14,7 +14,7 @@ source(dataFrameUtils)
 
 
 ## Differential expression analysis comparing Subset 1 to subset 2 
-## using Limma package 
+## using Limma package
 getDEgenes <- function(df) {
   measurements    <- getMeasurements(df)
   design          <- getDesign(measurements)
@@ -49,6 +49,7 @@ getDesign <- function(measurements) {
   DesignMatrix[which(DesignMatrix[, "S1"]==2), "S1"]=0
   DesignMatrix[which(DesignMatrix[, "S2"]==1), "S2"]=0
   DesignMatrix[which(DesignMatrix[, "S2"]==2), "S2"]=1
+
   return(DesignMatrix)
 
 }

@@ -22,9 +22,17 @@ window.smartRApp.controller('CorrelationController',
             running: false,
             scriptResults: {},
             params: {
-                method: 'pearson'
+                method: 'pearson',
+                transformation: 'raw'
             }
         };
+
+        $scope.$watch('runAnalysis.params.transformation', function(newValue, oldValue) {
+            // spearman and kendall are resistant to log transformation. Therefor the default to spearman if log used
+            if (newValue !== oldValue && newValue !== 'raw' && $scope.runAnalysis.params.method === 'pearson') {
+                $scope.runAnalysis.params.method = 'spearman';
+            }
+        });
 
         $scope.$watchGroup(['fetch.running', 'runAnalysis.running'],
             function(newValues) {

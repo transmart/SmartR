@@ -97,9 +97,11 @@ window.smartRApp.directive('conceptBox', [
                     scope.instructionNodeType = !_containsOnlyCorrectType();
                     if (scope.type === 'HD' && scope.conceptGroup.concepts.length > 1) {
                         _getNodeDetails(scope.conceptGroup.concepts, function(response) {
-                            if (Object.keys(response) < 2) {
-                                var platforms = response[Object.keys(response)[0]].platforms;
-                                scope.instructionNodePlatform = !platforms.every(function(el) { return el.title === el[0].title; });
+                            if (Object.keys(response.data).length < 2) {
+                                var platforms = response.data[Object.keys(response.data)[0]].platforms;
+                                scope.instructionNodePlatform = !platforms.every(function(el) { 
+                                    return el.title === platforms[0].title;
+                                });
                             } else {
                                 scope.instructionNodePlatform = true;
                             }

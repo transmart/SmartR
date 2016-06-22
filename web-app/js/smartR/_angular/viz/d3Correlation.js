@@ -65,6 +65,7 @@ window.smartRApp.directive('correlationPlot', [
                 patientIDs,
                 points,
                 method,
+                transformation,
                 minX,
                 maxX,
                 minY,
@@ -75,6 +76,7 @@ window.smartRApp.directive('correlationPlot', [
                 regLineSlope = data.regLineSlope[0];
                 regLineYIntercept = data.regLineYIntercept[0];
                 method = data.method[0];
+                transformation = data.transformation[0];
                 patientIDs = data.patientIDs;
                 points = data.points;
                 minX = data.points.min(function(d) { return d.x; });
@@ -86,12 +88,12 @@ window.smartRApp.directive('correlationPlot', [
             setData(scope.data);
 
             function updateStatistics(patientIDs, scatterUpdate, init) {
-                patientIDs = patientIDs.length !== 0 ? patientIDs : d3.selectAll('.point').map(function(d) {
-                    return d.patientID;
-                });
-                scatterUpdate = scatterUpdate === undefined ? false : scatterUpdate;
-                init = init === undefined ? false : init;
-                var args = { selectedPatientIDs: patientIDs };
+                if (! init) {
+                    patientIDs = patientIDs.length !== 0 ? patientIDs : d3.selectAll('.point').map(function(d) {
+                        return d.patientID;
+                    });
+                }
+                var args = { method: method, transformation: transformation, selectedPatientIDs: patientIDs };
 
                 rServeService.startScriptExecution({
                     taskType: 'run',
@@ -130,8 +132,26 @@ window.smartRApp.directive('correlationPlot', [
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
                 .on('contextmenu', function() {
                     d3.event.preventDefault();
-                    contextMenu.show();
+                    contextMenu.show('<input id="sr-correlation-zoom-btn" value="Zoom" class="sr-ctx-menu-btn"><br/>' +
+                                     '<input id="sr-correlation-exclude-btn" value="Exclude" class="sr-ctx-menu-btn"><br/>' +
+                                     '<input id="sr-correlation-reset-btn" value="Reset" class="sr-ctx-menu-btn">');
+                    _addEventListeners();
                 });
+
+            function _addEventListeners() {
+                smartRUtils.getElementWithoutEventListeners('sr-correlation-zoom-btn').addEventListener('click', function() {
+                    contextMenu.hide();
+                    zoomSelection();
+                });
+                smartRUtils.getElementWithoutEventListeners('sr-correlation-exclude-btn').addEventListener('click', function() {
+                    contextMenu.hide();
+                    excludeSelection();
+                });
+                smartRUtils.getElementWithoutEventListeners('sr-correlation-reset-btn').addEventListener('click', function() {
+                    contextMenu.hide();
+                    reset();
+                });
+            }
 
             var tip = d3.tip()
                 .attr('class', 'd3-tip')
@@ -153,7 +173,7 @@ window.smartRApp.directive('correlationPlot', [
             svg.append('text')
                 .attr('class', 'axisLabels')
                 .attr('transform', 'translate(' + width / 2 + ',' + (- 10) + ')')
-                .text(smartRUtils.shortenConcept(xArrLabel));
+                .text(smartRUtils.shortenConcept(xArrLabel) + ' (' + transformation + ')');
 
             svg.append('g')
                 .attr('class', 'y axis')
@@ -168,7 +188,7 @@ window.smartRApp.directive('correlationPlot', [
             svg.append('text')
                 .attr('class', 'axisLabels')
                 .attr('transform', 'translate('  + (width + 10) + ',' + height / 2 + ')rotate(90)')
-                .text(smartRUtils.shortenConcept(yArrLabel));
+                .text(smartRUtils.shortenConcept(yArrLabel) + ' (' + transformation + ')');
 
             svg.append('g')
                 .attr('class', 'x axis')
@@ -200,38 +220,12 @@ window.smartRApp.directive('correlationPlot', [
                 updateStatistics(selectedPatientIDs, false, true);
             }
 
-            var ctxHtml = '<input id="zoomButton" class="sr-ctx-menu-btn" type="button" value="Zoom"/><br/>' +
-            '<input id="excludeButton" class="sr-ctx-menu-btn" type="button" value="Exclude"/><br/>' +
-            '<input id="resetButton" class="sr-ctx-menu-btn" type="button" value="Reset"/>';
-
-
             var contextMenu = d3.tip()
                 .attr('class', 'd3-tip sr-contextmenu')
                 .offset([-10, 0])
-                .html(ctxHtml);
+                .html(function(d) { return d; });
 
             svg.call(contextMenu);
-
-            // This binds event listeners to the buttons whenever the context menu is rendered
-            var observer = new MutationObserver(function() {
-                $('#zoomButton').on('click', function() {
-                    contextMenu.hide();
-                    zoomSelection();
-                });
-                $('#excludeButton').on('click', function() {
-                    contextMenu.hide();
-                    excludeSelection();
-                });
-                $('#resetButton').on('click', function() {
-                    contextMenu.hide();
-                    reset();
-                });
-            });
-
-            observer.observe(document.querySelector('.sr-contextmenu'), {
-                childList: true,
-                subtree: true
-            });
 
             function updateSelection() {
                 var extent = brush.extent();
@@ -446,19 +440,36 @@ window.smartRApp.directive('correlationPlot', [
                         tip.hide();
                     });
 
+                var x1 = x(minX),
+                    y1 = y(regLineYIntercept + regLineSlope * minX),
+                    x2 = x(maxX),
+                    y2 = y(regLineYIntercept + regLineSlope * maxX);
+
+                x1 = x1 < 0 ? 0 : x1;
+                x1 = x1 > width ? width : x1;
+
+                x2 = x2 < 0 ? 0 : x2;
+                x2 = x2 > width ? width : x2;
+
+                y1 = y1 < 0 ? 0 : y1;
+                y1 = y1 > height ? height : y1;
+
+                y2 = y2 < 0 ? 0 : y2;
+                y2 = y2 > height ? height : y2;
+
                 regressionLine.transition()
                     .duration(animationDuration)
-                    .attr('x1', x(minX))
-                    .attr('y1', y(regLineYIntercept + regLineSlope * minX))
-                    .attr('x2', x(maxX))
-                    .attr('y2', y(regLineYIntercept + regLineSlope * maxX));
+                    .attr('x1', x1)
+                    .attr('y1', y1)
+                    .attr('x2', x2)
+                    .attr('y2', y2);
 
                 regressionLine.exit()
                     .remove();
             }
 
             function reset() {
-                updateStatistics([], false, true);
+                updateStatistics([], true, true);
             }
 
             updateScatterplot();

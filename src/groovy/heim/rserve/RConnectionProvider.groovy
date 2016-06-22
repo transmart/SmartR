@@ -12,8 +12,9 @@ class RConnectionProvider {
     GrailsApplication grailsApplication
 
     RConnection get() {
-        new RConnection(
-                grailsApplication.config.RModules.host ?: '127.0.0.1',
-                grailsApplication.config.RModules.rServePort ?: 6311)
+        def conn = new RConnection(grailsApplication.config.RModules.host ?: '127.0.0.1',
+                                   grailsApplication.config.RModules.rServePort ?: 6311)
+        conn.eval("options(bitmapType='cairo')")
+        conn
     }
 }

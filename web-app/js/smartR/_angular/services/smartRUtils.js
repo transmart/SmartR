@@ -37,6 +37,13 @@ window.smartRApp.factory('smartRUtils', ['$q', function($q) {
         });
     };
 
+    service.getElementWithoutEventListeners = function(cssSelector) {
+        var element = document.getElementById(cssSelector);
+        var copy = element.cloneNode(true);
+        element.parentNode.replaceChild(copy, element);
+        return copy;
+    };
+
     service.shortenConcept = function smartRUtils_shortenConcept(concept) {
         var split = concept.split('\\');
         split = split.filter(function(str) { return str !== ''; });
@@ -72,6 +79,13 @@ window.smartRApp.factory('smartRUtils', ['$q', function($q) {
         $('#heim-tabs').css('min-height', parseInt(height) + 25);
     };
 
+    /** 
+    * removes all kind of elements that might live out of the viz directive (e.g. tooltips, contextmenu, ...)
+    */
+    service.cleanUp = function() {
+        $('.d3-tip').remove();
+    };
+
     service.countCohorts = function() {
         return !window.isSubsetEmpty(1) + !window.isSubsetEmpty(2);
     };
@@ -80,7 +94,7 @@ window.smartRApp.factory('smartRUtils', ['$q', function($q) {
         var defer = $q.defer();
 
         function resolveResult() {
-            var res = window.GLOBAL.CurrentSubsetIDs.map(function (v) {
+            var res = window.GLOBAL.CurrentSubsetIDs.slice(1).map(function (v) {
                 return v || null;
             });
             if (res.some(function (el) {

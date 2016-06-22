@@ -1,7 +1,8 @@
 
-main <- function(excludedPatientIDs = integer()) {
+main <- function(excludedPatientIDs = integer(), useLog=FALSE) {
 
     output <- list()
+    output$useLog <- useLog
     output$concept <- fetch_params$ontologyTerms$datapoints_n0$fullName
     output$excludedPatientIDs <- excludedPatientIDs
 
@@ -9,7 +10,7 @@ main <- function(excludedPatientIDs = integer()) {
     if (nrow(df1) == 0) {
         stop(paste("Variable '", fetch_params$ontologyTerms$datapoints_n0$name, "' has no patients for subset 1"), sep="")
     }
-    df1 <- prepareData(df1, excludedPatientIDs)
+    df1 <- prepareData(df1, excludedPatientIDs, useLog)
     output <- addBoxplotStats(output, "Subset 1", df1)
     output$globalMin <- min(df1$value)
     output$globalMax <- max(df1$value)
@@ -19,7 +20,7 @@ main <- function(excludedPatientIDs = integer()) {
         if (nrow(df2) == 0) {
             stop(paste("Variable '", fetch_params$ontologyTerms$datapoints_n0$name, "' has no patients for subset 2"), sep="")
         }
-        df2 <- prepareData(df2, excludedPatientIDs)
+        df2 <- prepareData(df2, excludedPatientIDs, useLog)
         output <- addBoxplotStats(output, "Subset 2", df2)
         output$globalMin <- min(df1$value, df2$value)
         output$globalMax <- max(df1$value, df2$value)
@@ -28,10 +29,14 @@ main <- function(excludedPatientIDs = integer()) {
     toJSON(output)
 }
 
-prepareData <- function(df, excludedPatientIDs) {
+prepareData <- function(df, excludedPatientIDs, useLog) {
     df <- na.omit(df)
     df$jitter <- runif(nrow(df), -0.5, 0.5)
     colnames(df) <- c("patientID", "value", "jitter")
+    if (useLog) {
+        df$value <- log2(df$value)
+    }
+    df <- df[!is.infinite(df$value), ]
     df <- df[!df$patientID %in% excludedPatientIDs, ]
     df
 }

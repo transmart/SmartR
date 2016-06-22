@@ -93,7 +93,6 @@ class SmartRController {
     def nodeDetails() {
         def conceptKeys = request.JSON.conceptKeys
         conceptKeys = conceptKeys.collect { [concept_key: it] }
-        println conceptKeys.collect { [concept_key: it] }
         def constraints = []
 
         constraints << highDimensionResourceService.createAssayConstraint(

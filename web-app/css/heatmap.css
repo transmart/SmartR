@@ -1,6 +1,14 @@
 .square {
 }
 
+.square:hover {
+    opacity: 0.4;
+}
+
+.squareHighlighted {
+    opacity: 0.4;
+}
+
 .extraSquare {
 }
 
@@ -12,14 +20,6 @@
 
 .selected {
     opacity: 1;
-}
-
-.square:hover {
-    opacity: 0.4;
-}
-
-.squareHighlighted {
-    opacity: 0.4;
 }
 
 .extraSquare:hover {
@@ -56,11 +56,11 @@
     stroke: red;
 }
 
-.uid {
+.rowname {
     cursor: pointer;
 }
 
-.uid:hover {
+.rowname:hover {
     fill: blue;
     text-decoration: underline;
 }

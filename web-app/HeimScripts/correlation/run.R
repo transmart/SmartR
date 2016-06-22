@@ -1,9 +1,7 @@
 library(reshape2)
 
-main <- function(method = "pearson", selectedPatientIDs = integer()) {
+main <- function(method = "pearson", transformation = "raw", selectedPatientIDs = integer()) {
 
-    save(loaded_variables, file="/Users/sascha/loaded_variables.Rda")
-    save(fetch_params, file="/Users/sascha/fetch_params.Rda")
     df1 <- loaded_variables$datapoints_n0_s1
     df2 <- loaded_variables$datapoints_n1_s1
 
@@ -14,8 +12,18 @@ main <- function(method = "pearson", selectedPatientIDs = integer()) {
         stop(paste("Variable '", fetch_params$ontologyTerms$datapoints_n1$name, "' has no patients for subset 1"), sep="")
     }
     num_data <- merge(df1, df2, by="Row.Label")
-    num_data <- na.omit(num_data)
     colnames(num_data) <- c("patientID", "x", "y")
+
+    if (transformation == "log2") {
+        num_data$x <- log2(num_data$x)
+        num_data$y <- log2(num_data$y)
+    } else if (transformation == "log10") {
+        num_data$x <- log10(num_data$x)
+        num_data$y <- log10(num_data$y)
+    }
+    num_data <- na.omit(num_data)
+    num_data <- num_data[!is.infinite(num_data$x), ]
+    num_data <- num_data[!is.infinite(num_data$y), ]
 
     cat_data <- data.frame(patientID=integer(), annotation=character())
     filtered.loaded_variables <- get.loaded_variables.by.source("annotations", loaded_variables)
@@ -47,7 +55,9 @@ main <- function(method = "pearson", selectedPatientIDs = integer()) {
     }
 
     corTest <- tryCatch({
-        cor.test(df$x, df$y, method=method)
+        test <- cor.test(df$x, df$y, method=method)
+        test$p.value <- ifelse(test$p.value == 0, paste("<", as.character(.Machine$double.eps)), as.character(test$p.value))
+        test
     }, error = function(e) {
         ll <- list()
         ll$estimate <- as.numeric(NA)
@@ -66,6 +76,7 @@ main <- function(method = "pearson", selectedPatientIDs = integer()) {
         xArrLabel = fetch_params$ontologyTerms$datapoints_n0$fullName,
         yArrLabel = fetch_params$ontologyTerms$datapoints_n1$fullName,
         method = method,
+        transformation = transformation,
         patientIDs = df$patientID,
         annotations = unique(df$annotation),
         points = df
@@ -79,4 +90,3 @@ conceptStrToFolderStr <- function(s) {
     substr(s, 0, tail(backslashs, 2)[1])
 }
 
-main()

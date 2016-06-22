@@ -6,8 +6,10 @@ library(jsonlite)
 
 ## SE: Just to get things working for dev purposes
 # rm(list = ls())
-# load("/Users/serge/Documents/Projects/SmartR/Dev/R_workspace_objects/data.Rda")
-# load("/Users/serge/Documents/Projects/SmartR/Dev/R_workspace_objects/fetchParams.Rda")
+# load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/data.Rda")
+# load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/fetchParams.Rda")
+# load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/loaded_variables_withLDD.Rda")
+# load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/fetch_params_withLDD.Rda")
 # setwd("/Users/serge/GitHub/SmartR")
 
 if (!exists("remoteScriptDir")) {  #  Needed for unit-tests
@@ -35,8 +37,10 @@ main <- function() {
 
 
   ## Get Gene Expression Matrix as data frame
-  df <- parseInput()
-
+  data.list = parseInput()
+  df = data.list$HD
+  
+  
   ## Defining the content for these variables to
   ## perform differential expression analysis:
   max_rows = dim(df)[1]
@@ -61,7 +65,6 @@ main <- function() {
   df          <- df[1:min(max_rows, nrow(df)), ]  #  apply max_rows
 
   fields      <- buildFields(df)
-  extraFields <- buildExtraFields(fields)
   uids        <- df[, 1]
   patientIDs  <- unique(fields["PATIENTID"])[,1]
 
@@ -89,6 +92,8 @@ main <- function() {
 
   msgs <- c("Finished successfuly")
   list(messages = msgs)
+  
+  #return(df)
 }
 
 
@@ -96,8 +101,7 @@ main <- function() {
 #####################
 
 
-# # SE: For dev purposes we call the function here
-# out = main()
-# print(cbind(PROBE = as.character(out$uids), FC=out$logfoldValues, P=out$pvalValues)[1:10,])
+## #SE: For dev purposes we call the function here
+##out = main()
 
 

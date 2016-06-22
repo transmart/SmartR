@@ -33,21 +33,47 @@
 
             <workflow-tab tab-name="Run Analysis" disabled="runAnalysis.disabled">
                 <div class="heim-input-field sr-input-area">
-                    <h2>Correlation computation method:</h2>
+                    <h2>Data transformation:</h2>
                     <fieldset class="heim-radiogroup">
                         <label>
-                            <input type="radio" ng-model="runAnalysis.params.method" name="sortingSelect" value="pearson" checked> Pearson
+                            <input type="radio"
+                                   ng-model="runAnalysis.params.transformation"
+                                   value="raw" checked> Raw Values
                         </label>
                         <label>
-                            <input type="radio" ng-model="runAnalysis.params.method" name="sortingSelect" value="kendall"> Kendall
+                            <input type="radio"
+                                   ng-model="runAnalysis.params.transformation"
+                                   value="log2" checked> Log2
                         </label>
                         <label>
-                            <input type="radio" ng-model="runAnalysis.params.method" name="sortingSelect" value="spearman"> Spearman
+                            <input type="radio"
+                                   ng-model="runAnalysis.params.transformation"
+                                   value="log10" checked> Log10
+
                         </label>
                     </fieldset>
                 </div>
-                <br/>
-                <br/>
+                <div class="heim-input-field sr-input-area">
+                    <h2>Correlation computation method:</h2>
+                    <fieldset class="heim-radiogroup">
+                        <label>
+                            <input type="radio"
+                                   ng-model="runAnalysis.params.method"
+                                   value="pearson" checked> Pearson
+                        </label>
+                        <label>
+                            <input type="radio"
+                                   ng-model="runAnalysis.params.method"
+                                   value="kendall"> Kendall
+                        </label>
+                        <label>
+                            <input type="radio"
+                                   ng-model="runAnalysis.params.method"
+                                   value="spearman"> Spearman
+                        </label>
+                    </fieldset>
+                </div>
+                <hr class="sr-divider">
                 <run-button button-name="Create Plot"
                             store-results-in="runAnalysis.scriptResults"
                             script-to-run="run"

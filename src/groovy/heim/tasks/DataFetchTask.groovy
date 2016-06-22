@@ -159,6 +159,7 @@ class DataFetchTask extends AbstractTask {
                     }
                 } as ThreadFactory)
 
+        clearPreviousCreatedFiles()
         clearPreviousLoadedVariables()
 
         allDatasets.each {
@@ -212,6 +213,12 @@ class DataFetchTask extends AbstractTask {
         new TaskResult(
                 successful: true,
                 artifacts: ImmutableMap.of('currentLabels', currentLabels),)
+    }
+
+    private clearPreviousCreatedFiles() {
+        rServeSession.doWithRConnection { RConnection conn ->
+            RUtil.runRCommand conn, 'file.remove(list.files())'
+        }
     }
 
     private clearPreviousLoadedVariables() {

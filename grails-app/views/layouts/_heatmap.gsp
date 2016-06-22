@@ -10,15 +10,29 @@
                 concept-group="fetch.conceptBoxes.highDimensional"
                 type="HD"
                 min="1"
-                max="512"
+                max="-1"
                 label="High Dimensional"
                 tooltip="Select high dimensional data node(s) from the Data Set Explorer Tree and drag it into the box.
                 The nodes needs to be from the same platform.">
             </concept-box>
 
-            %{--TODO include low dimensions--}%
-            %{--<concept-box concept-group="fetch.conceptBoxes.numerical"></concept-box>--}%
-            %{--<concept-box concept-group="fetch.conceptBoxes.categorical"></concept-box>--}%
+            <concept-box
+                concept-group="fetch.conceptBoxes.numeric"
+                type="LD-numerical"
+                min="0"
+                max="-1"
+                label="Numeric Variables"
+                tooltip="Select numeric data node(s) from the Data Set Explorer Tree and drag it into the box.">
+            </concept-box>
+
+            <concept-box
+                concept-group="fetch.conceptBoxes.categoric"
+                type="LD-categorical"
+                min="0"
+                max="-1"
+                label="Categoric Variables"
+                tooltip="Select categoric data node(s) from the Data Set Explorer Tree and drag it into the box.">
+            </concept-box>
 
             <biomarker-selection biomarkers="fetch.selectedBiomarkers"></biomarker-selection>
             <hr class="sr-divider">
@@ -128,7 +142,11 @@
             <download-results-button disabled="runAnalysis.download.disabled"></download-results-button>
             <br/>
             <workflow-warnings warnings="runAnalysis.scriptResults.warnings"></workflow-warnings>
-            <heatmap-plot data="runAnalysis.scriptResults" width="1200" height="1200" params="runAnalysis.params"></heatmap-plot>
+            <heatmap-plot data="runAnalysis.scriptResults"
+                          width="1200"
+                          height="1200"
+                          params="runAnalysis.params">
+            </heatmap-plot>
 
         </workflow-tab>
 

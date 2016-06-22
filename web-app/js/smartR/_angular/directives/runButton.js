@@ -5,7 +5,8 @@
 window.smartRApp.directive('runButton', [
     '$rootScope',
     'rServeService',
-    function($rootScope, rServeService) {
+    'smartRUtils',
+    function($rootScope, rServeService, smartRUtils) {
         return {
             restrict: 'E',
             scope: {
@@ -53,6 +54,7 @@ window.smartRApp.directive('runButton', [
                 };
 
                 template_btn.onclick = function() {
+                    smartRUtils.cleanUp();
                     template_btn.disabled = true;
                     scope.storage = {};
                     scope.disabled = true;

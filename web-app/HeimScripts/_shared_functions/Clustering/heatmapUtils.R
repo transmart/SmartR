@@ -4,6 +4,16 @@
 
 
 
+## Check input args for heatmap run.R script
+verifyInputHeatmap <- function(max_rows, sorting) {
+  if (max_rows <= 0) {
+    stop("Max rows argument needs to be higher than zero.")
+  }
+  if (!(sorting == "nodes" || sorting == "subjects")) {
+    stop("Unsupported sorting type. Only nodes and subjects are allowed")
+  }
+}
+
 
 computeDendrogram <- function(distances, linkageMethod) {
   as.dendrogram(hclust(distances, method = linkageMethod))
@@ -37,6 +47,7 @@ dendrogramToJSON <- function(d) {
 
 
 addClusteringOutput <- function(jsn, measurements_arg) {
+
   # we need to discard rows and columns without at least two values
   # determine rows without two non-NAs
   thresholdRows <- floor(ncol(measurements_arg) / 2 ) + 1  #  Half of the lentgh +1 has to be filled otherwise
@@ -46,11 +57,11 @@ addClusteringOutput <- function(jsn, measurements_arg) {
   # and for columns
   logicalSelection <- apply(measurements_arg, 2, function(col) length(which(!is.na(col))) >= thresholdCols)
   measurements_cols <- t(measurements_arg[ , logicalSelection])
-  jsn$numberOfClusteredRows <- nrow(measurements_rows)
-  jsn$numberOfClusteredColumns <- nrow(measurements_cols)  # still nrow (transposed)
-  if (is.null(jsn$numberOfClusteredRows)) jsn$numberOfClusteredRows <- 0
-  if (is.null(jsn$numberOfClusteredColumns)) jsn$numberOfClusteredColumns <- 0
-  if (jsn$numberOfClusteredRows < 2 | jsn$numberOfClusteredColumns < 2 ) {  # Cannot cluster less than 2x2 matrix
+  numberOfClusteredRows <- nrow(measurements_rows)
+  numberOfClusteredColumns <- nrow(measurements_cols)  # still nrow (transposed)
+  if (is.null(numberOfClusteredRows)) numberOfClusteredRows <- 0
+  if (is.null(numberOfClusteredColumns)) numberOfClusteredColumns <- 0
+  if (numberOfClusteredRows < 2 | numberOfClusteredColumns < 2 ) {  # Cannot cluster less than 2x2 matrix
     jsn$warnings <- append(jsn$warnings, c("Clustering could not be done due to insufficient data"))
     return(jsn)
   }
@@ -93,46 +104,72 @@ addClusteringOutput <- function(jsn, measurements_arg) {
   }
   
   
-  jsn$hclustEuclideanComplete <- list(
+  ######################  
+  ######################
+  
+  
+  
+  hclustEuclideanComplete <- list(
     columnOrder(colDendrogramEuclideanComplete),
     rowOrder(rowDendrogramEuclideanComplete),
     dendrogramToJSON(colDendrogramEuclideanComplete),
     dendrogramToJSON(rowDendrogramEuclideanComplete)
   )
   
-  jsn$hclustEuclideanSingle <- list(
+  hclustEuclideanSingle <- list(
     columnOrder(colDendrogramEuclideanSingle),
     rowOrder(rowDendrogramEuclideanSingle),
     dendrogramToJSON(colDendrogramEuclideanSingle),
     dendrogramToJSON(rowDendrogramEuclideanSingle)
   )
   
-  jsn$hclustEuclideanAverage <- list(
+  hclustEuclideanAverage <- list(
     columnOrder(colDendrogramEuclideanAverage),
     rowOrder(rowDendrogramEuclideanAverage),
     dendrogramToJSON(colDendrogramEuclideanAverage),
     dendrogramToJSON(rowDendrogramEuclideanAverage)
   )
   
-  jsn$hclustManhattanComplete <- list(
+  hclustManhattanComplete <- list(
     columnOrder(colDendrogramManhattanComplete),
     rowOrder(rowDendrogramManhattanComplete),
     dendrogramToJSON(colDendrogramManhattanComplete),
     dendrogramToJSON(rowDendrogramManhattanComplete)
   )
   
-  jsn$hclustManhattanSingle <- list(
+  hclustManhattanSingle <- list(
     columnOrder(colDendrogramManhattanSingle),
     rowOrder(rowDendrogramManhattanSingle),
     dendrogramToJSON(colDendrogramManhattanSingle),
     dendrogramToJSON(rowDendrogramManhattanSingle)
   )
   
-  jsn$hclustManhattanAverage <- list(
+  hclustManhattanAverage <- list(
     columnOrder(colDendrogramManhattanAverage),
     rowOrder(rowDendrogramManhattanAverage),
     dendrogramToJSON(colDendrogramManhattanAverage),
     dendrogramToJSON(rowDendrogramManhattanAverage)
   )
+  
+
+  ######################
+  ######################
+
+  hclust = list(
+    hclustEuclideanComplete = hclustEuclideanComplete,
+    hclustEuclideanSingle = hclustEuclideanSingle,
+    hclustEuclideanAverage = hclustEuclideanAverage,
+    hclustManhattanComplete = hclustManhattanComplete,
+    hclustManhattanSingle = hclustManhattanSingle,
+    hclustManhattanAverage = hclustManhattanAverage,
+    numberOfClusteredRows = nrow(measurements_rows),
+    numberOfClusteredColumns = nrow(measurements_cols)
+  )
+  
+  ## This will add a list with all hierarchical clustering
+  ## results to the jsn list object creating a list of lists
+  jsn$hclust = hclust
+  
+
   return(jsn)
 }

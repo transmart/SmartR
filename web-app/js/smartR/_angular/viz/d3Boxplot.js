@@ -38,15 +38,35 @@ window.smartRApp.directive('boxplot', [
             globalMin = Number.MIN_VALUE,
             globalMax = Number.MAX_VALUE,
             categories = [],
-            excludedPatientIDs = [];
+            excludedPatientIDs = [],
+            useLog = false;
         function setData(data) {
             concept = data.concept[0];
             globalMin = data.globalMin[0];
             globalMax = data.globalMax[0];
             categories = data['Subset 2'] ? ['Subset 1', 'Subset 2'] : ['Subset 1'];
             excludedPatientIDs = data.excludedPatientIDs;
+            useLog = data.useLog[0];
         }
         setData(scope.data);
+
+        var removeBtn = smartRUtils.getElementWithoutEventListeners('sr-boxplot-remove-btn');
+        removeBtn.addEventListener('click', removeOutliers);
+
+        var resetBtn = smartRUtils.getElementWithoutEventListeners('sr-boxplot-reset-btn');
+        resetBtn.addEventListener('click', reset);
+
+        var kdeCheck = smartRUtils.getElementWithoutEventListeners('sr-boxplot-kde-check');
+        kdeCheck.addEventListener('change', function() { swapKDE(kdeCheck.checked); });
+        kdeCheck.checked = false;
+
+        var jitterCheck = smartRUtils.getElementWithoutEventListeners('sr-boxplot-jitter-check');
+        jitterCheck.addEventListener('change', function() { swapJitter(jitterCheck.checked); });
+        jitterCheck.checked = false;
+
+        var logCheck = smartRUtils.getElementWithoutEventListeners('sr-boxplot-log-check');
+        logCheck.checked = useLog;
+        logCheck.addEventListener('change', function() { swapLog(logCheck.checked); });
 
         var animationDuration = 1000;
 
@@ -99,7 +119,7 @@ window.smartRApp.directive('boxplot', [
         boxplot.append('text')
             .attr('transform', 'translate(' + (-40) + ',' + (height / 2) + ')rotate(-90)')
             .attr('text-anchor', 'middle')
-            .text(smartRUtils.shortenConcept(concept));
+            .text(smartRUtils.shortenConcept(concept) + (useLog ? ' (log2)' : ''));
 
         var tip = d3.tip()
             .attr('class', 'd3-tip')
@@ -125,34 +145,29 @@ window.smartRApp.directive('boxplot', [
             })
             .call(brush);
 
-        var ctxHtml = '<input id="excludeButton" class="sr-ctx-menu-btn" type="button" value="Exclude Selection"/>' +
-                '<input id="resetButton" class="sr-ctx-menu-btn" type="button" value="Reset All"/>';
-
         var contextMenu = d3.tip()
             .attr('class', 'd3-tip sr-contextmenu')
-            .html(ctxHtml);
+            .html(function(d) { return d; });
 
         boxplot.call(contextMenu);
 
-        var observer = new MutationObserver(function() {
-            $('#excludeButton').on('click', function() {
+        function _addEventListeners() {
+            smartRUtils.getElementWithoutEventListeners('sr-boxplot-exclude-btn').addEventListener('click', function() {
                 contextMenu.hide();
                 excludeSelection();
             });
-            $('#resetButton').on('click', function() {
+
+            smartRUtils.getElementWithoutEventListeners('sr-boxplot-reset-btn-2').addEventListener('click', function() {
                 contextMenu.hide();
                 reset();
             });
-        });
-
-        observer.observe(document.querySelector('.sr-contextmenu'), {
-            childList: true,
-            subtree: true
-        });
+        }
 
         boxplot.on('contextmenu', function () {
             d3.event.preventDefault();
-            contextMenu.show();
+            contextMenu.show('<input id="sr-boxplot-exclude-btn" value="Exclude" class="sr-ctx-menu-btn"><br/>' +
+                             '<input id="sr-boxplot-reset-btn-2" value="Reset" class="sr-ctx-menu-btn">');
+            _addEventListeners();
         });
 
         var currentSelection;
@@ -174,7 +189,7 @@ window.smartRApp.directive('boxplot', [
 
         function excludeSelection() {
             excludedPatientIDs = excludedPatientIDs.concat(currentSelection);
-            var settings = { excludedPatientIDs: excludedPatientIDs };
+            var settings = { excludedPatientIDs: excludedPatientIDs, useLog: logCheck.checked };
 
             rServeService.startScriptExecution({
                 taskType: 'run',
@@ -236,18 +251,32 @@ window.smartRApp.directive('boxplot', [
         }
 
         var jitterWidth = 1.0;
-        var jitterChecked = false;
 
         function swapJitter() {
-            jitterChecked = !jitterChecked;
             categories.forEach(function(category) {
                 d3.selectAll('.point.' + smartRUtils.makeSafeForCSS(shortenNodeLabel(category)))
                     .transition()
                     .duration(animationDuration)
                     .attr('cx', function(d) {
-                        return jitterChecked ? x(category) + boxWidth * jitterWidth * d.jitter : x(category);
+                        return jitterCheck.checked ? x(category) + boxWidth * jitterWidth * d.jitter : x(category);
                     });
             });
+        }
+
+        function swapLog() {
+            var settings = { excludedPatientIDs: excludedPatientIDs, useLog: logCheck.checked };
+            rServeService.startScriptExecution({
+                taskType: 'run',
+                arguments: settings
+            }).then(
+                function (response) {
+                    removePlot();
+                    scope.data = JSON.parse(response.result.artifacts.value);
+                },
+                function (response) {
+                    console.error(response);
+                }
+            );
         }
 
         var boxes = {};
@@ -395,7 +424,7 @@ window.smartRApp.directive('boxplot', [
             point.enter()
                 .append('circle')
                 .attr('cx', function (d) {
-                    return jitterChecked ? x(category) + boxWidth * jitterWidth * d.jitter : x(category);
+                    return jitterCheck.checked ? x(category) + boxWidth * jitterWidth * d.jitter : x(category);
                 })
                 .attr('r', 0)
                 .attr('fill', function (d) { return colorScale(d.value); })
@@ -458,14 +487,6 @@ window.smartRApp.directive('boxplot', [
             excludeSelection(); // Abusing the method because I can
         }
 
-        document.getElementById('sr-boxplot-remove-btn').addEventListener('click', removeOutliers);
-        document.getElementById('sr-boxplot-reset-btn').addEventListener('click', reset);
-        var kdeCheck = document.getElementById('sr-boxplot-kde-check');
-        kdeCheck.checked = false;
-        kdeCheck.addEventListener('change', function() { swapKDE(kdeCheck.checked); });
-        var jitterCheck = document.getElementById('sr-boxplot-jitter-check');
-        jitterCheck.checked = false;
-        jitterCheck.addEventListener('change', function() { swapJitter(jitterCheck.checked); });
     }
 
 }]);

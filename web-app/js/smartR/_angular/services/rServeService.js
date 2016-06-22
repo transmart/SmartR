@@ -101,7 +101,7 @@ window.smartRApp.factory('rServeService', [
                     sessionId: sessionId
                 }
             });
-        }
+        };
 
         service.destroySession = function(sessionId) {
             sessionId = sessionId || state.sessionId;

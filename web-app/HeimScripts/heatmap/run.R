@@ -3,12 +3,14 @@ library(limma)
 library(jsonlite)
 
 
-# # SE: Just to get things working for dev purposes
+# SE: Just to get things working for dev purposes
 # rm(list = ls())
-# load("/Users/serge/Documents/Projects/SmartR/Dev/R_workspace_objects/data.Rda")
-# load("/Users/serge/Documents/Projects/SmartR/Dev/R_workspace_objects/fetchParams.Rda")
+# load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/data.Rda")
+# load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/fetchParams.Rda")
+# load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/loaded_variables_withLDD.Rda")
+# load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/fetch_params_withLDD.Rda")
 # setwd("/Users/serge/GitHub/SmartR")
-# #######
+#######
 
 
 if (!exists("remoteScriptDir")) {  #  Needed for unit-tests
@@ -26,6 +28,7 @@ source(utils)
 source(limmaUtils)
 source(dataFrameUtils)
 source(heatmapUtils)
+#######################
 
 
 SUBSET1REGEX <- "_s1$"  # Regex identifying columns of subset 1.
@@ -33,62 +36,135 @@ markerTableJson <- "markerSelectionTable.json" # Name of the json file with limm
 
 main <- function(max_rows = 100, sorting = "nodes", ranking = "coef", geneCardsAllowed = FALSE) {
     max_rows <- as.numeric(max_rows)
-    verifyInput(max_rows, sorting)
-    df <- parseInput()
+    verifyInputHeatmap(max_rows, sorting)
+    
+    ## Returns a list containing two variables named HD and LD
+    data.list <- parseInput()
+    
+    ## Splitting up input into low dim and high dim vars 
+    hd.df = data.list$HD
+    ld.list = data.list$LD    
+    
+    ## SE: For debug
+    #hd.df = hd.df[,1:3]
+    
     write.table(
-        df,
+        hd.df,
         "heatmap_orig_values.tsv",
         sep = "\t",
         na = "",
         row.names = FALSE,
         col.names = TRUE
     )
-    df          <- addStats(df, sorting, ranking, max_rows)
-    df          <- mergeDuplicates(df)
-    df          <- df[1:min(max_rows, nrow(df)), ]  #  apply max_rows
-    fields      <- buildFields(df)
-    extraFields <- buildExtraFields(fields)
-    uids        <- df[, 1]
-    patientIDs  <- unique(fields["PATIENTID"])[,1]
+    
+    ## Creating the extended diff expr analysis data frame containing besides the input data,
+    ## a set of statistics. The returned data frame is ranked according to provided ranking statistic
+    hd.df          <- addStats(hd.df, sorting, ranking, max_rows)
+    
+    hd.df          <- mergeDuplicates(hd.df)
+    
+    ## Filtering down the hd.df to retain only the n top ranked rows
+    hd.df          <- hd.df[1:min(max_rows, nrow(hd.df)), ]  
+    
+    
+    ## High dimensional value data frame with unpivoted data structure
+    ## Providing intensity values and zscore for given patient, sample id/colname,
+    ## probe id/rowname and subset
+    fields.df      <- buildFields(hd.df)
+    
 
-    significanceValues <- df["SIGNIFICANCE"][,1]
-    features <- unique(extraFields["FEATURE"])[,1]
+    
+    ## High dimensional annotation data frame with unpivoted data structure
+    ## providing the information on which sample/colnames belongs to which cohort
+    extraFieldsHighDim.df <- buildExtraFieldsHighDim(fields.df)
+
+    
+    ## Low dimensional annotation data frame  
+    extraFieldsLowDim.df = buildExtraFieldsLowDim(ld.list)
+    
+    
+
+    ldd_rownames.vector = as.vector(unique(extraFieldsLowDim.df[, "ROWNAME"]))
+    ldd_rownames.vector = c("Cohort", ldd_rownames.vector)
+    
+
+    
+    ## rowNames reflect here the unique identifiers of the GEX matrix this means "probeID--geneSymbol"
+    rowNames        <- hd.df[, 1]
+    
+    ## colNames should reflect here only the sample names (e.g. "67_Breast_s1")
+    colNames = colnames(hd.df)[grep("^\\d+_.+_s\\d$", colnames(hd.df), perl = TRUE)]
+
+    significanceValues <- hd.df["SIGNIFICANCE"][,1]
+    
+    
+    ## A df containing the computed values for
+    ## all possible statistical methods
+    statistics_hd.df = getAllStatForExtDataFrame(hd.df)
+
+
+    ## Concatenating the two extraField types (that have been generated
+    ## for the low and high dim data) 
+    extraFields.df = rbind(extraFieldsHighDim.df, extraFieldsLowDim.df)
+    
+    
+    ## The returned jsn object that will be dumped to file
     jsn <- list(
-        "fields"             = fields,
-        "patientIDs"         = patientIDs,
-        "uids"               = uids,
-        "significanceValues" = significanceValues,
-        "logfoldValues"      = df["LOGFOLD"][,1],
-        "ttestValues"        = df["TTEST"][,1],
-        "pvalValues"         = df["PVAL"][,1],
-        "adjpvalValues"      = df["ADJPVAL"][,1],
-        "bvalValues"         = df["BVAL"][,1],
-        "ranking"            = ranking,
-        "features"           = features,
-        "extraFields"        = extraFields,
-        "maxRows"            = max_rows,
-        "warnings"           = c() # initiate empty vector
+        "fields"              = fields.df,
+        "patientIDs"          = getSubject(colNames),
+        "colNames"            = colNames,
+        "rowNames"            = rowNames,
+        "ranking"             = ranking,
+        "extraFields"         = extraFields.df,
+        "features"            = ldd_rownames.vector,
+        "maxRows"             = max_rows,
+        "allStatValues"      = statistics_hd.df,
+        "warnings"            = c() # initiate empty vector
     )
+    
+    ## To keep track of the parameters selected for the execution of the code
     writeRunParams(max_rows, sorting, ranking)
-    measurements <- cleanUp(df)  # temporary stats like SD and MEAN need
-    # to be removed for clustering to work
+    
+    # temporary stats like SD and MEAN need to be removed for clustering to work
+    measurements.df <- cleanUp(hd.df)  
 
-    # discard UID column
-    if (ncol(df) > 2){
-        measurements <- measurements[, 2:ncol(measurements)]
+   
+
+    ## discard rownames / probe id column
+    ## in case of more samples
+    if (ncol(hd.df) > 10){
+        measurements.df <- measurements.df[, 2:ncol(measurements.df)]
     } else {
-        measurements <- measurements[2]
+        ## if only one sample
+        colname = colnames(hd.df)[2] 
+        measurements.df <- data.frame(VALUES = hd.df[,2])
+        colnames(measurements.df) = colname
+        
     }
 
-    measurements <- toZscores(measurements)
+    rownames(measurements.df) = as.vector(rowNames)
+
     
+    ## GEX intensity matrix converted to zeta scores
+    ## for clustering purposes
+    measurementsAsZscore.matrix <- toZscores(measurements.df)
+
+  
     
-    if (is.na(significanceValues)) {
+    ## If no significanceValues are available throw a warning:
+    if (all(is.na(significanceValues)))
         jsn$warnings <- append(jsn$warnings, c("Significance sorting could not be done due to insufficient data"))
-    }
-    jsn <- addClusteringOutput(jsn, measurements) #
+    
+    
+    jsn <- addClusteringOutput(jsn, measurementsAsZscore.matrix) 
+    
+
+    
+    ## Transforming the output list to json format
     jsn <- toJSON(jsn, pretty = TRUE, digits = I(17))
-    writeDataForZip(df, measurements, patientIDs)  # for later zip generation
+    
+    
+    writeDataForZip(hd.df, measurementsAsZscore.matrix, colNames)  # for later zip generation
     write(jsn, file = "heatmap.json")
     # json file be served the same way
     # like any other file would - get name via
@@ -96,24 +172,13 @@ main <- function(max_rows = 100, sorting = "nodes", ranking = "coef", geneCardsA
 
     msgs <- c("Finished successfuly")
     list(messages = msgs)
-    
-#     ## SE: For dev purposes
-#     return(jsn)
-}
-
-## Check input args for heatmap 
-verifyInput <- function(max_rows, sorting) {
-    if (max_rows <= 0) {
-        stop("Max rows argument needs to be higher than zero.")
-    }
-    if (!(sorting == "nodes" || sorting == "subjects")) {
-        stop("Unsupported sorting type. Only nodes and subjects allowed")
-    }
 }
 
 
-# # SE: For dev purposes we call the function here
-# out = main()
-# print(out)
+
+
+## SE: For debug purposes
+#out = main(ranking = "median")
+
 
 

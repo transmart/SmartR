@@ -54,7 +54,7 @@ class RSessionController {
     def deleteFiles() {
         sessionService.removeAllFiles(sessionId)
 
-        response.status = 200
+        response.status = 204
         render ''
     }
 

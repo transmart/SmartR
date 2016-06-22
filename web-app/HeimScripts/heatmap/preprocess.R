@@ -1,73 +1,91 @@
-library("WGCNA")
+library(WGCNA)
 
 # Pre-processing data saved in preprocessed
 # Pre-processing parameters saved in global preprocessing_params
 # They can be considered fresh if the variable preprocessed exists
 
+
+# SE: Just to get things working for dev purposes
+#rm(list = ls())
+#load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/data.Rda")
+#load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/fetchParams.Rda")
+#load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/loaded_variables_withLDD.Rda")
+#load("/Users/serge/Documents/Projects/SmartR/Development_env_Input_workspace/R_workspace_objects/Heatmap/fetch_params_withLDD.Rda")
+#setwd("/Users/serge/GitHub/SmartR")
+#######
+
+
 if (!exists("remoteScriptDir")) {  #  Needed for unit-tests
   remoteScriptDir <- "web-app/HeimScripts"
 }
 
-utils <- paste(remoteScriptDir, "/heatmap/utils.R", sep="")
-source(utils)
+## Loading functions ##
+utils <- paste(remoteScriptDir, "/_shared_functions/Generic/utils.R", sep="")
+dataFrameUtils <- paste(remoteScriptDir, "/_shared_functions/GEX/DataFrameAndGEXmatrixUtils.R", sep="")
 
+source(utils)
+source(dataFrameUtils)
+
+
+## SE: Handles Low and high dimensional data. Creates preprocessed variable as a list storing HD and LD data
+## In case no LD data is available this list item is set to NULL
 main <- function(aggregate=FALSE) {
   msgs = c("")
-  df <- mergeFetchedData(loaded_variables)
-  good.input <- ncol(df) > 3 && nrow(df) > 0 && sum(df$Bio.marker != "") > 0 # more than one sample, contains any rows, non empty Bio.marker column.
+  
+  df <- loaded_variables[grep("highDimensional", names(loaded_variables))]
+
+  if (aggregate && is.null(dim(df))) {
+      stop("Cannot aggregate probes: there only is data for a single probe (ie. only one row of data) or there is insufficient bio.marker information for the selected probes to be able to match the probes to biomarkers for aggregation (e.g. in case of micro-array data to match probe ID to gene symbol). Suggestion: skip probe aggregation.")
+  } 
+
+  ## High dimensional data
+  df <- mergeFetchedData(loaded_variables[grep("highDimensional", names(loaded_variables))])
+  ## Low dimensional data
+  ld.idx = grep( "^(categoric)|(numeric)", names(loaded_variables))
+  
+  if(length(ld.idx)==0)
+    ld = c()
+  else
+    ld = loaded_variables[ld.idx]
+  
+  
+  ## SE: Modified cutoff for samples to 2 instead of 3
+  good.input <- ncol(df) > 2 && nrow(df) > 0 && sum(df$Bio.marker != "") > 0 # min one sample, contains any rows, non empty Bio.marker column.
+  
   if(aggregate && good.input){
     df <- dropEmptyGene(df)
+    
     aggr  <- aggregate.probes(df)
-    assign("preprocessed", aggr, envir = .GlobalEnv)
+    
+   
+    
+    ## SE: modified assign value to list type to handle also low dim data
+    assign("preprocessed", list(HD = aggr, LD=ld), envir = .GlobalEnv)
+    
     discarded.rows <- nrow(df) - nrow(aggr)
     msgs <- paste("Total discarded rows:",discarded.rows)
   }
   else if(aggregate && !good.input){
-    stop("Incorrect subset - in order to perform probe aggregation more than one samples are needed.")
+    stop("Incorrect subset - in order to perform probe aggregation more than one sample is needed.")
   }else{
     msgs <- c("No preprocessing applied.")
-      assign("preprocessed", df, envir = .GlobalEnv)
+    
+    ## SE: modified assign value to list type to handle also low dim data
+      assign("preprocessed", list(HD = df, LD = ld), envir = .GlobalEnv)
   }
 
   assign("preprocessing_params", list(aggregate=aggregate), envir = .GlobalEnv)
 
-  list(finished=T,messages=msgs)
-}
-
-aggregate.probes <- function(df) {
-  if(nrow(df)<2){
-    stop("Cannot aggregate probes: there only is data for a single probe (ie. only one row of data) or 
-        there is insufficient bio.marker information for the selected probes to be able to match the probes to 
-        biomarkers for aggregation (e.g. in case of micro-array data to match probe ID to gene symbol). 
-        Suggestion: skip probe aggregation.")
-  }
-  measurements <- df[,3:ncol(df)]
-  row.names(measurements) <- df[,1]
-  collapsed <- collapseRows(measurements, df[,2], df[,1], "MaxMean",
-                            connectivityBasedCollapsing = FALSE, #in Rmodules = TRUE. In our spec, not required
-                            methodFunction = NULL, # It only needs to be specified if method="function"
-                            #connectivityPower = 1, # ignored when connectivityBasedCollapsing = FALSE
-                            selectFewestMissing = FALSE)
   
-  #collapsed returns 0 if collapseRows does not work, otherwise it returns a list
-  if(is.numeric(collapsed))
-  {
-    stop("Probe aggregation is not possible: there are too many missing data points in the data for succesfull probe
-aggregation. Skip probe aggregation or select more genes/proteins/metabolites/... 
-
-Note: for aggregation only the data from probes that have accompanying bio.marker information is used
-(e.g. in case of micro-array data only the probes are used that have gene symbol information coupled to it).
-This could mean the dataset used for aggregation is smaller than the initially selected dataset.")
-  }
-  collapsedMeasurements <- collapsed$datETcollapsed
-  Bio.marker <- collapsed$group2row[,1] # first column of this matrix always contains gene
-  Row.Label <- collapsed$group2row[,2]  # second column of this matrix always contains probe_id
-  lastColIndex <- ncol(df)
-  lastbutOne <- lastColIndex -1
-  df <- data.frame(collapsedMeasurements)
-  df["Bio.marker"] <- Bio.marker
-  df["Row.Label"] <- Row.Label
-  row.names(df) <- NULL # WGCNA adds row.names. We do not need them to be set
-  return(df[,c(lastColIndex, lastbutOne , 1:(lastbutOne-1))])
+  list(finished=T,messages=msgs)
  
+  ## SE: For debug 
+  #return(df)
 }
+
+
+
+
+## SE: For debug
+#main(aggregate=T)
+# print(dim(df))

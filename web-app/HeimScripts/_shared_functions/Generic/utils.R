@@ -4,10 +4,36 @@
 ######################################################################
 
 
+
+## Returns a vector providing the data tree node names 
+## as a named vector where a node name identifier like "numeric_n0" is mapped to
+## its real name in the tree (e.g. "Alive")
+node2name = function(){
+  
+  names = character(length = length(names(fetch_params$ontologyTerms)))
+  node_names = character(length = length(names(fetch_params$ontologyTerms)))
+  
+  for(i in 1:length(names(fetch_params$ontologyTerms))){
+    node_name = names(fetch_params$ontologyTerms)[i]
+    name = get(names(fetch_params$ontologyTerms)[i], fetch_params$ontologyTerms )$name
+    
+    names[i] = name
+    node_names[i] = node_name
+  }
+  names(names) = node_names
+  
+  return(names)
+}
+
+
+
+## Retrieve High dim node for vector of patientIDs
 getNode <- function(patientIDs) {
+
     splittedIds <- strsplit(patientIDs,"_") # During merge, which is always
     # run we append subset id, either
     # _s1 or _s2 to PATIENTID.
+    
     sapply(splittedIds, FUN = tail_elem,n = 2) # In proper patienid subset will
     # always be  at the end.
     # This select last but one elemnt
@@ -28,44 +54,9 @@ getTimelineValues <- function(nodes, ontologyTerms) {
     }, USE.NAMES = FALSE)
 }
 
-
-
-# nodeID has usually this format: 'X123_highDimensional_n0_s1)
-# this method pretifies it with the actual node label like this: '123_BreastCancer'
-replaceNodeIDNodeLabel <- function(ids, ontologyTerms) {
-    patientIDs <- sub("_.+_n[0-9]+_s[0-9]+", "", ids, perl=TRUE) # remove the _highDimensional_n0_s1
-    patientIDs <- sub("^X", "", patientIDs, perl=TRUE) # remove the X
-    nodes <- sub("_s[0-9]+", "", ids, perl=TRUE) # remove the _s1
-    nodes <- sub(".+?_", "", nodes, perl=TRUE) # remove the X123_
-    # replace highDimensional with Breast
-    nodeLabels <- lapply(ontologyTerms[nodes], function(terms) return(terms$name))
-    paste(patientIDs, nodeLabels, sep="_")
+getSubject <- function(str) {
+    sub("_.*", "", str)
 }
-
-
-
-getSubject <- function(patientIDs) {
-    splittedIds <- strsplit(patientIDs,"_")
-    sapply(splittedIds, FUN = discardNodeAndSubject)
-}
-
-
-
-discardNodeAndSubject <- function(label) {
-    label <- strsplit(label,"_")
-    endOfSubject <-
-    length(label) - 2  #last too elements are node and subset.
-    label <- label[1:endOfSubject]
-    paste(label, collapse = "_")
-}
-
-
-
-fixString <- function(str) {
-    gsub("[^a-zA-Z0-9-]", "", str, perl = TRUE)
-}
-
-
 
 ## This function dumps the run parameters into a json format file
 ## The function can be called either
