@@ -65,7 +65,7 @@ window.addSmartRPanel = function addSmartRPanel(parentPanel) {
 };
 
 function cleanUpSmartR() {
-    var el1 = $('.d3-tip');
+    var el1 = jQuery('.d3-tip');
     if (el1) {
         el1.remove();
     }
