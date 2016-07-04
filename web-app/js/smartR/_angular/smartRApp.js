@@ -2,6 +2,33 @@
 
 'use strict';
 
+/**
+ * Extends Array to be able to get min value
+ * @returns {*}
+ */
+Array.prototype.min = function() {
+    var min = this[0];
+
+    for ( var i = 0; i < this.length; i++ )
+        if ( this[i] < min ) min = this[i];
+
+    return min;
+};
+
+/**
+ * Extends Array to be able to get max value
+ * @returns {*}
+ */
+Array.prototype.max = function() {
+    var max = this[0];
+
+    for ( var i = 0; i < this.length; i++ )
+        if ( this[i] > max ) max = this[i];
+
+    return max;
+};
+
+
 window.smartRApp = angular.module('smartRApp', ['ngRoute', 'door3.css'])
     .config(['$httpProvider', function($httpProvider) {
         //initialize get if not there
