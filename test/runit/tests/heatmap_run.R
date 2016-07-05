@@ -1,22 +1,23 @@
 source("web-app/HeimScripts/heatmap/run.R")
 
-# Test slash being removed - issue that used to broke sorting
-test.fixString.slash.case <- function()
-{
-  testString <- "a/b"
-  result <- fixString(testString)
-  expected <- "ab"
-  checkEquals(result,expected)
-}
-
-#Dashes are allowed in probe_ids
-test.fixString.dash.case <- function()
-{
-  testString <- "a-b"
-  result <- fixString(testString)
-  expected <- "a-b"
-  checkEquals(result,expected)
-}
+##SE: Fct not used anymore
+# # Test slash being removed - issue that used to broke sorting
+# test.fixString.slash.case <- function()
+# {
+#   testString <- "a/b"
+#   result <- fixString(testString)
+#   expected <- "ab"
+#   checkEquals(result,expected)
+# }
+# 
+# #Dashes are allowed in probe_ids
+# test.fixString.dash.case <- function()
+# {
+#   testString <- "a-b"
+#   result <- fixString(testString)
+#   expected <- "a-b"
+#   checkEquals(result,expected)
+# }
 
 test.mergeFetchedData.singledf <- function()
 {
@@ -47,9 +48,9 @@ test.get.subset <- function()
 
 test.get.subject <- function()
 {
-  test_patient_ids <- c("wk26_16702_n0_s1", "wk26_16705_n1_s1", "wk26_16707_n0_s1", "wk52_16710_n0_s2")
+  test_patient_ids <- c("120_Breast_s2", "121_Breast_s1", "122_Breast_s1", "123_Breast_s2")
   result <- getSubject(test_patient_ids)
-  expected <- c("wk26_16702", "wk26_16705", "wk26_16707", "wk52_16710")
+  expected <- c("120", "121", "122", "123")
   checkEquals(result, expected)
 }
 

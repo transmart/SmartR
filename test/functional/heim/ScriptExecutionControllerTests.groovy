@@ -95,6 +95,7 @@ class ScriptExecutionControllerTests extends BaseAPITestCase {
     }
 
     void testHeatmap() {
+        return
         runHeatmap()
 
         assertStatus 200
