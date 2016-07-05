@@ -79,10 +79,12 @@ window.smartRApp.directive('correlationPlot', [
                 transformation = data.transformation[0];
                 patientIDs = data.patientIDs;
                 points = data.points;
-                minX = data.points.min(function(d) { return d.x; });
-                maxX = data.points.max(function(d) { return d.x; });
-                minY = data.points.min(function(d) { return d.y; });
-                maxY = data.points.max(function(d) { return d.y; });
+                var xValues =  data.points.map(function(d) { return d.x; });
+                var yValues =  data.points.map(function(d) { return d.y; });
+                minX = Math.min.apply(null, xValues);
+                minY = Math.min.apply(null, yValues);
+                maxX = Math.max.apply(null, xValues);
+                maxY = Math.max.apply(null, yValues);
             }
 
             setData(scope.data);
@@ -307,10 +309,10 @@ window.smartRApp.directive('correlationPlot', [
                     .bins(bins)(points.map(function(d) { return d.y; }));
 
                 var bottomHistHeightScale = d3.scale.linear()
-                    .domain([0, bottomHistData.max(function(d) { return d.y; })])
+                    .domain([0, Math.max.apply(null, bottomHistData.map(function(d) { return d.y; }))])
                     .range([1, bottomHistHeight]);
                 var leftHistHeightScale = d3.scale.linear()
-                    .domain([0, leftHistData.max(function(d) { return d.y; })])
+                    .domain([0, Math.max.apply(null, leftHistData.map(function(d) { return d.y; }))])
                     .range([2, leftHistHeight]);
 
                 var bottomHistGroup = svg.selectAll('.bar.bottom')

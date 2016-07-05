@@ -280,7 +280,7 @@ window.smartRApp.directive('boxplot', [
         }
 
         var boxes = {};
-        categories.each(function(category) {
+        categories.forEach(function(category) {
             boxes[category] = boxplot.append('g');
             var params = scope.data[category];
             createBox(params, category, boxes[category]);

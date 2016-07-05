@@ -4,7 +4,6 @@ modules = {
         resource url: [plugin: 'smart-r', dir: 'css', file: 'tooltip.css']
         resource url: [plugin: 'smart-r', dir: 'js/resource', file: 'jquery-2.1.4.min.js']
         resource url: [plugin: 'smart-r', dir: 'js/resource', file: 'jquery-ui-1.11.4.min.js']
-        resource url: [plugin: 'smart-r', dir: 'js/resource', file: 'jquery.tablesorter.min.js']
         resource url: [plugin: 'smart-r', dir: 'js/resource', file: 'd3.min.js']
         resource url: [plugin: 'smart-r', dir: 'js/resource', file: 'd3-tip.js']
         resource url: [plugin: 'smart-r', dir: 'js/resource', file: 'jsrender.js']

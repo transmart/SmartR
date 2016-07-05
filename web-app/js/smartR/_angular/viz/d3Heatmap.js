@@ -748,7 +748,7 @@ window.smartRApp.directive('heatmapPlot', [
                 statistics.map(function(d) { return d[ranking]; })
                     .sort(function(a, b) { return a - b; })
                     .filter(function(d, i) { return i < cutoff; })
-                    .each(function(d) {
+                    .forEach(function(d) {
                         d3.select('.bar.idx-' + smartRUtils.makeSafeForCSS(d[0])).classed('cuttoffHighlight', true);
                         d3.selectAll('.square.rowname-' + smartRUtils.makeSafeForCSS(rowNames[d[0]])).classed('cuttoffHighlight', true);
                     });
@@ -920,14 +920,14 @@ window.smartRApp.directive('heatmapPlot', [
                     .attr('x', 5 - margin.left)
                     .attr('y', 8 - margin.top + 100)
                     .attr('text-anchor', 'start')
-                    .text(steps.min().toFixed(1));
+                    .text(Math.min.apply(null, steps).toFixed(1));
 
                 legendItems.append('text')
                     .attr('class', 'legendText')
                     .attr('x', 5 - margin.left + legendWidth)
                     .attr('y', 8 - margin.top + 100)
                     .attr('text-anchor', 'end')
-                    .text(steps.max().toFixed(1));
+                    .text(Math.max.apply(null, steps).toFixed(1));
             }
 
             function unselectAll() {
@@ -1029,7 +1029,7 @@ window.smartRApp.directive('heatmapPlot', [
                     }).on('click', function(d) {
                         var leafs = d.index.split(' ');
                         var genes = [];
-                        leafs.each(function(leaf) {
+                        leafs.forEach(function(leaf) {
                             var rowName = rowNames[leaf];
                             var split = rowName.split("--");
                             split.shift();

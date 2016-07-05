@@ -65,10 +65,10 @@ window.addSmartRPanel = function addSmartRPanel(parentPanel) {
 };
 
 function cleanUpSmartR() {
-    var el1 = $('.d3-tip');
-    if (el1) {
-        el1.remove();
-    }
+    var d3tips = document.getElementsByClassName('d3-tip');
+    Array.prototype.forEach.call(d3tips, function(el) { // d3tips is array-like object
+        el.parentNode.removeChild(el);
+    });
 }
 cleanUpSmartR();
 
