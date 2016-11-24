@@ -89,6 +89,34 @@ class SmartRController {
         }
     }
 
+    def variantDB = {
+        def url = params.server + params.path
+        def http = new HTTPBuilder(url)
+        def body = [
+            filter_command: params.filter_command
+        ]
+        http.post(body: body) { response ->
+            def text = response.entity.content.text
+            render text
+        }
+    }
+
+    def pdMap = {
+        def url = params.url
+        def http = new HTTPBuilder(url)
+        def body = [
+            identifier: params.identifier,
+            login: params.login,
+            password: params.password,
+            model: params.model,
+            expression_value: params.expression_value,
+        ]
+        http.post(body: body) { response ->
+            def text = response.entity.content.text
+            render text
+        }
+    }
+
     // This is a copy of Rmodules HighDimensionController
     def nodeDetails() {
         def conceptKeys = request.JSON.conceptKeys

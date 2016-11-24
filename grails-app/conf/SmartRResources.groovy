@@ -57,5 +57,8 @@ modules = {
         // linegraph
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'linegraph.js']
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/viz', file: 'd3Linegraph.js']
+        // ppmidemo
+        resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'ppmidemo.js']
+        resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/viz', file: 'ppmiDemo.js']
     }
 }
