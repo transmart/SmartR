@@ -10,14 +10,15 @@ window.smartRApp.controller('PPMIDemoController',
         $scope.variantDB = {
             data: [],
             regions: '',
-            genes: 'TP63',
+            genes: 'PARK2',
             server: "http://bio3.uni.lu/accessDB/accessDB",
         };
 
         $scope.pdmap = {
             user: "test",
             password: "test.123",
-            server: "http://pg-sandbox.uni.lu/minerva/galaxy.xhtml",
+            server: "http://pg-sandbox.uni.lu/minerva",
+            servlet: "/galaxy.xhtml",
             model: 'pdmap_dec15',
         };
 
@@ -90,8 +91,8 @@ window.smartRApp.controller('PPMIDemoController',
         };
 
         var getVariantDBRequestsForGenes = function(ids, genes) {
-            var path = '/variant_individuals/POST/';
-            var filter_command = 'splitcommand!eq!t&getfields!eq!start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' + ids.join(',') +
+            var path = '/variant_all/POST/';
+            var filter_command = 'splitcommand!eq!t&getfields!eq!gene_at_position,start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' + ids.join(',') +
                 '&variant_genotypes!ov!' + ids.join(',') + '&gene!eq!' + genes.join(',');
             return $.ajax({
                 url: pageInfo.basePath + '/SmartR/variantDB',
@@ -108,7 +109,7 @@ window.smartRApp.controller('PPMIDemoController',
         }
 
         var getVariantDBData = function(request) {
-            var path = '/variant_individuals/POST/';
+            var path = '/variant_all/POST/';
             var filter_command = request;
             return $.ajax({
                 url: pageInfo.basePath + '/SmartR/variantDB',
@@ -128,6 +129,7 @@ window.smartRApp.controller('PPMIDemoController',
             $scope.variantDB.data = [];
             var genes = $scope.variantDB.genes.split(',').map(function(d) { return d.trim(); });
             getTMIDs().then(function(tmIDs) {
+                var subsets = smartRUtils.unique(tmIDs, function(d) { return d.subset; });
                 getVariantDBIDs(tmIDs).then(function(variantDBIDs) {
                     if ($scope.variantDB.genes) {
                         getVariantDBRequestsForGenes(variantDBIDs, genes).then(function(requests) {
@@ -139,6 +141,7 @@ window.smartRApp.controller('PPMIDemoController',
                                     indices['ref'] = variantData.fields.indexOf('reference');
                                     indices['alt'] = variantData.fields.indexOf('alleleseq');
                                     indices['chr'] = variantData.fields.indexOf('chrom');
+                                    indices['gene'] = variantData.fields.indexOf('gene_at_position');
                                     indices['ids'] = [];
                                     variantDBIDs.forEach(function(variantDBID) {
                                         var idx = variantData.fields.indexOf(variantDBID);
@@ -148,14 +151,15 @@ window.smartRApp.controller('PPMIDemoController',
                                     });
 
                                     variantData.values.forEach(function(d) {
-                                        var pos = d[indices['pos']]
-                                        var ref = d[indices['ref']]
-                                        var alt = d[indices['alt']]
-                                        var chr = d[indices['chr']]
+                                        var pos = d[indices['pos']];
+                                        var ref = d[indices['ref']];
+                                        var alt = d[indices['alt']];
+                                        var chr = d[indices['chr']];
+                                        var gene = d[indices['gene']];
                                         var variants = indices['ids'].map(function(idIndex) {
                                             return d[idIndex];
                                         });
-                                        var frq = variants.filter(function(d) { return d.indexOf('1') !== -1; }) / variants.length;
+                                        var frq = variants.filter(function(d) { return d.indexOf('1') !== -1; }).length / variants.length;
                                         if (isNaN(frq)) { frq = 0; }
 
                                         $scope.variantDB.data.push({
@@ -164,6 +168,7 @@ window.smartRApp.controller('PPMIDemoController',
                                             alt: alt,
                                             chr: chr,
                                             frq: frq,
+                                            gene: gene,
                                             subset: 1, // FIXME: make dynamic
                                         });
                                     });
@@ -184,22 +189,23 @@ window.smartRApp.controller('PPMIDemoController',
             expression_value += 'position\toriginal_dna\talternative_dna\tname\tcontig\tallel_frequency\n';
 
             $scope.variantDB.data.forEach(function(d) {
-                expression_value += d.pos + '\t' + d.ref + '\t' + d.alt + '\t' + 'FIXME' + '\t' + d.chr + '\t' + d.frq + '\n';
+                expression_value += d.pos + '\t' + d.ref + '\t' + d.alt + '\t' + d.gene + '\t' + d.chr + '\t' + d.frq + '\n';
             });
 
+            var identifier = Math.random() * Math.pow(10,17);
             return $.ajax({
                 url: pageInfo.basePath + '/SmartR/pdMap',
                 type: 'POST',
                 data: {
-                    url: $scope.pdmap.server,
-                    identifier: Math.random() * Math.pow(10,17),
+                    url: $scope.pdmap.server + $scope.pdmap.servlet,
+                    identifier: identifier,
                     login: $scope.pdmap.user,
                     password: $scope.pdmap.password,
                     model: $scope.pdmap.model,
                     expression_value: expression_value,
                 }
             }).then(
-                function(res) { console.log(res); },
+                function(res) { window.open($scope.pdmap.server + '?id=' + $scope.pdmap.model + '&layout=' + identifier); },
                 function(res) { console.error(res); }
             );
         };
