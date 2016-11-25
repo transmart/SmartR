@@ -23,16 +23,17 @@ window.smartRApp.controller('PPMIDemoController',
             server: "http://pg-sandbox.uni.lu/minerva",
             servlet: "/galaxy.xhtml",
             model: 'pdmap_dec15',
-            invalid: false,
+            invalid: true,
         };
 
         $scope.$watch('variantDB', function(vdb) {
             $scope.variantDB.invalid = !vdb.server || (!!vdb.regions && !!vdb.genes);
         }, true);
 
-        $scope.$watch('pdmap', function(pdm) {
-            $scope.pdmap.invalid = !pdm.user || !pdm.password || !pdm.server || !$scope.variantDB.data;
-        }, true);
+        var checkPDMapSanity = function() {
+            $scope.pdmap.invalid = !$scope.pdmap.user || !$scope.pdmap.password || !$scope.pdmap.server || !$scope.variantDB.data.length;
+        };
+        $scope.$watch('pdmap', checkPDMapSanity, true);
 
         var getTMIDs = function() {
             var dfd = $.Deferred();
@@ -83,7 +84,7 @@ window.smartRApp.controller('PPMIDemoController',
                 }
             });
         };
-        setVariantDBGeneList();
+        // setVariantDBGeneList();
 
         var getVariantDBIDs = function(tmIDs) {
             var path = '/individuals/POST/';
@@ -206,6 +207,9 @@ window.smartRApp.controller('PPMIDemoController',
                     gene: gene,
                     subset: subset,
                 });
+            });
+            $scope.$apply(function() {
+                checkPDMapSanity();
             });
         };
 
