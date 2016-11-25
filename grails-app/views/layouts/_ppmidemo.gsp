@@ -35,6 +35,7 @@
     </div>
 </div>
 
+<p id="error-msgs">{{messages.error}}</p>
 
 </div>
 </script>

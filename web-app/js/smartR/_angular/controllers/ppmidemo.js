@@ -26,6 +26,10 @@ window.smartRApp.controller('PPMIDemoController',
             invalid: true,
         };
 
+        $scope.messages = {
+            error: "",
+        };
+
         $scope.$watch('variantDB', function(vdb) {
             $scope.variantDB.invalid = !vdb.server || (!!vdb.regions && !!vdb.genes);
         }, true);
@@ -109,9 +113,13 @@ window.smartRApp.controller('PPMIDemoController',
             var genes = [];
             if ($scope.variantDB.genes) {
                 genes = $scope.variantDB.genes.split(',').map(function(d) { return d.trim(); })
-                    .filter(function(gene) { return $scope.pdmap.genes.indexOf(gene) !== -1; });
+                    .filter(function(gene) { return $scope.variantDB.availableGenes.indexOf(gene) !== -1; });
             } else {
                 genes = $scope.variantDB.availableGenes;
+            }
+            if (! genes.length) {
+                $scope.messages.error = "None of the specified genes could be found in VariantDB.";
+                $scope.$apply();
             }
             var path = '/variant_all/POST/';
             var filter_command = 'splitcommand!eq!t&getfields!eq!gene_at_position,start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' + ids.join(',') +

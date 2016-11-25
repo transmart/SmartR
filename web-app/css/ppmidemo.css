@@ -17,4 +17,21 @@
     margin: 3px;
     padding: 60px 10px 60px 10px;
     border-radius: 10px;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    box-shadow: 5px 5px 20px grey;
+}
+
+#ppmi-form button:hover:not([disabled]) {
+    cursor: pointer;
+    border-radius: 0;
+}
+
+#ppmi-form button:disabled {
+    background: #F44336;
+}
+
+#error-msgs {
+    color: red;
 }
