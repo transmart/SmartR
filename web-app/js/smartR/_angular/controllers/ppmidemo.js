@@ -278,6 +278,7 @@ window.smartRApp.controller('PPMIDemoController',
                     _createPDMapLayout(2, identifier2).then(function() {
                         window.open($scope.pdmap.server);
                     });
+                } else {
                     window.open($scope.pdmap.server);
                 }
             });

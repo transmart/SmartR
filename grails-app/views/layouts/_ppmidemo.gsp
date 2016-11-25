@@ -31,7 +31,7 @@
     </div>
 
     <div>
-        <button ng-click="fetchVariantDB()" ng-disabled="pdmap.invalid">Create PDMap Overlay</button>
+        <button ng-click="createPDMapLayout()" ng-disabled="pdmap.invalid">Create PDMap Overlay</button>
     </div>
 </div>
 
