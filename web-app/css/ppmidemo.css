@@ -1,0 +1,20 @@
+#ppmi-form div {
+    float: left;
+}
+
+#ppmi-form > div {
+    width: 150px;
+}
+
+#ppmi-form input {
+    width: 90%;
+    padding: 3px;
+    margin: 3px;
+}
+
+#ppmi-form button {
+    float: left;
+    margin: 3px;
+    padding: 60px 10px 60px 10px;
+    border-radius: 10px;
+}

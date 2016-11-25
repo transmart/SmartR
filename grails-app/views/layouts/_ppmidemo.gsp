@@ -5,7 +5,7 @@
 
 <div id="ppmi-form">
     <div>
-        <label for="variantdb-region" >Region: </label>
+        <label for="variantdb-region" >Regions: </label>
         <input id="variantdb-region" type="text" placeholder="13:10000-12500,15:100-5000" ng-model="variantDB.regions"/>
 
         <label for="variantdb-genes">Genes: </label>
@@ -16,9 +16,7 @@
     </div>
 
     <div>
-        <input type="button"
-               value="Fetch VariantDB Data"
-               ng-click="fetchVariantDB()"/>
+        <button ng-click="fetchVariantDB()" ng-disabled="variantDB.invalid">Fetch VariantDB Data</button>
     </div>
 
     <div>
@@ -33,7 +31,7 @@
     </div>
 
     <div>
-        <input type="button" value="Create PDMap Layout" ng-click="createPDMapLayout()"/>
+        <button ng-click="fetchVariantDB()" ng-disabled="pdmap.invalid">Create PDMap Overlay</button>
     </div>
 </div>
 
