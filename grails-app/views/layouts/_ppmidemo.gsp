@@ -9,7 +9,7 @@
         <input id="variantdb-region" type="text" placeholder="13:10000-12500,15:100-5000" ng-model="variantDB.regions"/>
 
         <label for="variantdb-genes">Genes: </label>
-        <input id="variantdb-genes" type="text" placeholder="ALB,CCR5,CD4,IL10" ng-model="variantDB.genes"/>
+        <input id="variantdb-genes" type="text" placeholder="ALB,CCR5,CD4,IL10" ng-model="variantDB.selectedGenes"/>
 
         <label for="variantdb-serer">Server: </label>
         <input id="variantdb-server" type="text" ng-model="variantDB.server"/>

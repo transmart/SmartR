@@ -226,5 +226,13 @@ window.smartRApp.factory('smartRUtils', ['$q', function($q) {
         document.getElementById('sr-loading').style.visibility = visible ? 'visible' : 'hidden';
     };
 
+    service._intersectArrays = function(a, b) {
+        var t;
+        if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
+        return a.filter(function (e) {
+            if (b.indexOf(e) !== -1) return true;
+        });
+    };
+
     return service;
 }]);
