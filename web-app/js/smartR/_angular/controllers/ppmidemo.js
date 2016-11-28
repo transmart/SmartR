@@ -96,91 +96,94 @@ window.smartRApp.controller('PPMIDemoController',
         setIntersectionGenes();
 
         var getVariantDBIDs = function(tmIDs) {
-            var path = '/individuals/POST/';
-            var filter_command = 'getfields!eq!id,comments&comments!isa!' + tmIDs.map(function(d) { return d.id; }).join(',');
-            return $.ajax({
+            var dfd = $.Deferred();
+            $.ajax({
                 url: pageInfo.basePath + '/SmartR/variantDB',
                 type: 'POST',
                 data: {
                     server: $scope.variantDB.server,
-                    path: path,
-                    filter_command: filter_command,
-                }
-            }).then(
-                function(res) {
-                    return JSON.parse(res).values.map(function(d) { return d[0]; });
+                    path: '/individuals/POST/',
+                    filter_command: 'getfields!eq!id,comments&comments!isa!' + tmIDs.map(function(d) { return d.id; }).join(','),
                 },
-                function() { alert('Connection refused: ' + $scope.variantDB.server); }
-            );
+                success: function(res) {
+                    var ids = JSON.parse(res).values.map(function(d) { return d[0]; });
+                    if (ids.length) {
+                        dfd.resolve(ids);
+                    } else {
+                        dfd.reject('No matching Subject IDs found in VariantDB.');
+                    }
+                },
+                failure: function() { dfd.reject('An error occured when trying to communicate with VariantDB.'); }
+            });
+            return dfd.promise();
         };
 
         var getVariantDBRequestsForGenes = function(ids) {
+            var dfd = $.Deferred();
             var genes = [];
-            if ($scope.variantDB.selectedGenes) {
+            if ($scope.variantDB.selectedGenes.length) {
                 genes = $scope.variantDB.selectedGenes.split(',').map(function(d) { return d.trim().toLowerCase(); })
                     .filter(function(d) { return $scope.intersection.genes.indexOf(d) !== -1; });
                 if (! genes.length) {
-                    $scope.messages.error = "None of the specified genes could be found in VariantDB.";
-                    $scope.$apply();
+                    dfd.reject("None of the specified genes could be found in VariantDB.");
                 }
             } else {
                 genes = $scope.intersection.genes;
             }
-            var path = '/variant_all/POST/';
-            var filter_command = 'splitcommand!eq!t&getfields!eq!gene_at_position,start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' + ids.join(',') +
-                '&variant_genotypes!ov!' + ids.join(',') + '&gene!eq!' + genes.join(',');
-            return $.ajax({
+
+            $.ajax({
                 url: pageInfo.basePath + '/SmartR/variantDB',
                 type: 'POST',
                 data: {
                     server: $scope.variantDB.server,
-                    path: path,
-                    filter_command: filter_command,
-                }
-            }).then(
-                function(res) { return JSON.parse(res); },
-                function() { alert('Connection refused: ' + $scope.variantDB.server); }
-            );
+                    path: '/variant_all/POST/',
+                    filter_command: 'splitcommand!eq!t&getfields!eq!gene_at_position,start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' + ids.join(',') +
+                        '&variant_genotypes!ov!' + ids.join(',') + '&gene!eq!' + genes.join(','),
+                },
+                success: function(res) { dfd.resolve(JSON.parse(res)); },
+                failure: function() { dfd.reject('An error occured when trying to communicate with VariantDB.'); }
+
+            });
+            return dfd.promise();
         };
 
         var getVariantDBRequestsForRegions = function(ids) {
+            var dfd = $.Deferred();
             var regions = $scope.variantDB.regions;
             regions = regions.split(',').map(function(d) { return d.trim(); });
             var chrs = regions.map(function(d) { return d.split(':')[0]; });
             var starts = regions.map(function(d) { return d.split(':')[1].split('-')[0]; });
             var stops = regions.map(function(d) { return d.split(':')[1].split('-')[1]; });
-            var path = '/variant_all/POST/';
-            var filter_command = 'splitcommand!eq!t&getfields!eq!start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' + ids.join(',') +
-                '&variant_genotypes!ov!' + ids.join(',') + '&chrom!eq!' + chrs.join(',') + '&start!gt!' + starts.join(',') + '&start!lt!' + stops.join(',');
-            return $.ajax({
+            $.ajax({
                 url: pageInfo.basePath + '/SmartR/variantDB',
                 type: 'POST',
                 data: {
                     server: $scope.variantDB.server,
-                    path: path,
-                    filter_command: filter_command,
-                }
-            }).then(
-                function(res) { return JSON.parse(res); },
-                function() { alert('Connection refused: ' + $scope.variantDB.server); }
-            );
+                    path: '/variant_all/POST/',
+                    filter_command: 'splitcommand!eq!t&getfields!eq!start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' +
+                            ids.join(',') + '&variant_genotypes!ov!' + ids.join(',') + '&chrom!eq!' + chrs.join(',') + '&start!gt!' +
+                            starts.join(',') + '&start!lt!' + stops.join(',')
+                },
+                success: function(res) { dfd.resolve(res); },
+                failure: function() { dfd.reject('An error occured when trying to communicate with VariantDB.'); }
+            });
+            return dfd.promise();
         };
 
         var getVariantDBData = function(request) {
-            var path = '/variant_all/POST/';
-            var filter_command = request;
-            return $.ajax({
+            var dfd = $.Deferred();
+            $.ajax({
                 url: pageInfo.basePath + '/SmartR/variantDB',
                 type: 'POST',
                 data: {
                     server: $scope.variantDB.server,
-                    path: path,
-                    filter_command: filter_command,
-                }
-            }).then(
-                function(res) { return res; },
-                function() { alert('Connection refused: ' + $scope.variantDB.server); }
-            );
+                    path: '/variant_all/POST/',
+                    filter_command: request,
+                },
+                success: function(res) { dfd.resolve(res); },
+                failure: function() { dfd.reject('An error occured when trying to communicate with VariantDB.'); }
+            });
+            return dfd.promise();
         };
 
         var prepareData = function(data, subset, variantDBIDs) {
@@ -226,7 +229,13 @@ window.smartRApp.controller('PPMIDemoController',
             });
         };
 
+        var handleError = function(err) {
+            $scope.messages.error = err;
+            $scope.$apply();
+        };
+
         $scope.fetchVariantDB = function() {
+            $scope.messages.error = '';
             $scope.variantDB.data = [];
             getTMIDs().then(function(tmIDs) {
                 var subsets = smartRUtils.unique(tmIDs.map(function(d) { return d.subset; }));
@@ -246,13 +255,13 @@ window.smartRApp.controller('PPMIDemoController',
                                 requests.forEach(function(request) {
                                     getVariantDBData(request).then(function(data) {
                                         prepareData(data, subset, variantDBIDs);
-                                    });
+                                    }, handleError);
                                 });
-                            });
+                            }, handleError);
                         }
-                    });
+                    }, handleError);
                 });
-            });
+            }, handleError);
         };
 
         var _createPDMapLayout = function(subset, identifier) {
