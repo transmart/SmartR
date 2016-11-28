@@ -26,18 +26,29 @@ window.smartRApp.controller('PPMIDemoController',
 
         $scope.intersection = {
             genes: []
-        }
+        };
 
         $scope.messages = {
             error: "",
+            loading: "",
+            totalRequests: 0,
+            finishedRequests: 0,
         };
 
-        $scope.$watch('variantDB', function(vdb) {
+        $scope.$watch('variantDB', function(vdb, vdbOld) {
+            if (vdb.selectedGenes !== vdbOld.selectedGenes || vdb.regions !== vdbOld.regions || vdb.server !== vdbOld.server) {
+                $scope.pdmap.invalid = true;
+                $scope.messages.totalRequests = 0;
+                $scope.messages.finishedRequests = 0;
+            }
             $scope.variantDB.invalid = !vdb.server || (!!vdb.regions && !!vdb.selectedGenes);
         }, true);
 
         var checkPDMapSanity = function() {
-            $scope.pdmap.invalid = !$scope.pdmap.user || !$scope.pdmap.password || !$scope.pdmap.server || !$scope.variantDB.data.length;
+            $scope.pdmap.invalid = !$scope.pdmap.user ||
+                !$scope.pdmap.password ||
+                !$scope.pdmap.server ||
+                !$scope.variantDB.data.length;
         };
         $scope.$watch('pdmap', checkPDMapSanity, true);
 
@@ -227,9 +238,12 @@ window.smartRApp.controller('PPMIDemoController',
             $scope.$apply(function() {
                 checkPDMapSanity();
             });
+            $scope.messages.finishedRequests += 1;
+            $scope.$apply();
         };
 
         var handleError = function(err) {
+            $scope.messages.finishedRequests += 1;
             $scope.messages.error = err;
             $scope.$apply();
         };
@@ -244,6 +258,8 @@ window.smartRApp.controller('PPMIDemoController',
                     getVariantDBIDs(tmSubsetIDs).then(function(variantDBIDs) {
                         if ($scope.variantDB.regions) {
                             getVariantDBRequestsForRegions(variantDBIDs).then(function(requests) {
+                                $scope.messages.totalRequests = requests.length;
+                                $scope.$apply();
                                 requests.forEach(function(request) {
                                     getVariantDBData(request).then(function(data) {
                                         prepareData(data, subset, variantDBIDs);
@@ -252,6 +268,8 @@ window.smartRApp.controller('PPMIDemoController',
                             });
                         } else {
                             getVariantDBRequestsForGenes(variantDBIDs).then(function(requests) {
+                                $scope.messages.totalRequests = requests.length;
+                                $scope.$apply();
                                 requests.forEach(function(request) {
                                     getVariantDBData(request).then(function(data) {
                                         prepareData(data, subset, variantDBIDs);

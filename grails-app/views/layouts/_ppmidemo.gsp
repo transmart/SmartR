@@ -36,6 +36,7 @@
 </div>
 
 <p id="error-msgs">{{messages.error}}</p>
+<p id="loading-msgs">Completed Requests: {{messages.finishedRequests}} / {{messages.totalRequests}}</p>
 
 </div>
 </script>
