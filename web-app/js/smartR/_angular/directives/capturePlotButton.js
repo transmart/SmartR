@@ -43,13 +43,43 @@ window.smartRApp.directive('capturePlotButton', [function() {
                     }
                 });
 
+                function b64toBlob(b64Data, contentType, sliceSize) {
+                    contentType = contentType || '';
+                    sliceSize = sliceSize || 512;
+
+                    var byteCharacters = atob(b64Data);
+                    var byteArrays = [];
+
+                    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                        var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+                        var byteNumbers = new Array(slice.length);
+                        for (var i = 0; i < slice.length; i++) {
+                            byteNumbers[i] = slice.charCodeAt(i);
+                        }
+
+                        var byteArray = new Uint8Array(byteNumbers);
+
+                        byteArrays.push(byteArray);
+                    }
+
+                    var blob = new Blob(byteArrays, {type: contentType});
+                    return blob;
+                }
+
                 var defs = '<defs><style type="text/css"><![CDATA[' + rules.join('') + ']]></style></defs>';
                 svg.attr({version: '1.1' , xmlns:"http://www.w3.org/2000/svg"});
                 svg.append(defs);
                 $(scope.target + ' svg').wrap('<div id="sr-capture-container"></div>');
                 var b64 = btoa(unescape(encodeURIComponent($('#sr-capture-container').html())));
-                var tab = window.open();
-                tab.document.write("<a href-lang='image/svg+xml' href='data:image/svg+xml;base64,\n"+b64+"' title='file.svg' download>Download SVG</a>");
+                var blob = b64toBlob(b64, 'image/svg+xml');
+                var blobUrl = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.style = 'display: none';
+                a.href = blobUrl;
+                a.download = scope.filename;
+                a.click();
+                URL.revokeObjectURL(blobUrl);
                 $(scope.target + ' svg').unwrap();
                 $(scope.target + ' svg defs').remove();
             });
