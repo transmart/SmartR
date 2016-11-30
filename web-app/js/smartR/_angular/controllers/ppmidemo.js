@@ -277,13 +277,13 @@ window.smartRApp.controller('PPMIDemoController',
                     getVariantDBIDs(tmSubsetIDs).then(function(variantDBIDs) {
                         if ($scope.variantDB.regions) {
                             getVariantDBRequestsForRegions(variantDBIDs).then(function(requests) {
-                                $scope.messages.totalRequests = requests.length;
+                                $scope.messages.totalRequests += requests.length;
                                 $scope.$apply();
                                 handleRequests(requests, subset, variantDBIDs);
                             });
                         } else {
                             getVariantDBRequestsForGenes(variantDBIDs).then(function(requests) {
-                                $scope.messages.totalRequests = requests.length;
+                                $scope.messages.totalRequests += requests.length;
                                 $scope.$apply();
                                 handleRequests(requests, subset, variantDBIDs);
                             }, handleError);
