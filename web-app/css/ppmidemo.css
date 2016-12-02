@@ -1,26 +1,12 @@
-#ppmi-form div {
-    float: left;
-}
-
-#ppmi-form > div {
-    width: 150px;
-}
-
-#ppmi-form input {
-    width: 90%;
-    padding: 3px;
-    margin: 3px;
-}
-
 #ppmi-form button {
     float: left;
     margin: 3px;
-    padding: 60px 10px 60px 10px;
+    width: 100%;
+    height: 30px;
     border-radius: 10px;
     border: none;
     background: #4CAF50;
     color: white;
-    box-shadow: 5px 5px 20px grey;
 }
 
 #ppmi-form button:hover:not([disabled]) {
@@ -34,4 +20,48 @@
 
 #error-msgs {
     color: red;
+}
+
+#sr-ppmi-pdmap-form > div {
+    margin: 2px;
+    padding: 2px;
+}
+
+#sr-ppmi-variantdb-form > div {
+    margin: 2px;
+    padding: 2px;
+}
+#sr-ppmi-pdmap-form {
+    width: 45%;
+    float: left;
+    margin: 0 0 0 5px;
+}
+#sr-ppmi-variantdb-form {
+    width: 45%;
+    float: left;
+    margin: 0 5px 0 0;
+}
+#sr-ppmi-variantdb-form p {
+    font-weight: bold;
+    font-size: 12pt;
+}
+#sr-ppmi-pdmap-form p {
+    font-weight: bold;
+    font-size: 12pt;
+}
+#sr-ppmi-pdmap-form input[type="text"] {
+    width: 100%;
+}
+
+#sr-ppmi-variantdb-form input[type="text"], [type="password"] {
+    width: 100%;
+}
+#sr-ppmi-messages {
+    float: left;
+    width: 90%;
+}
+
+#loading-msgs {
+    font-size: 12pt;
+    font-weight: bold;
 }
