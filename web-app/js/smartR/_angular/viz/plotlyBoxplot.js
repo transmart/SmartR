@@ -31,29 +31,26 @@ window.smartRApp.directive('boxplot', [
     function createBoxplot(scope, vizDiv) {
         var cf = crossfilter(scope.data.dataMatrix);
         var byValue = cf.dimension(function(d) { return d.value; });
-        var bySubset = cf.dimension(function(d) { return d.subset; });
         var byBioMarker = cf.dimension(function(d) { return d.bioMarker; });
 
         var plotData = [];
         smartRUtils.unique(smartRUtils.getValuesForDimension(byBioMarker)).forEach(function(bioMarker) {
             byBioMarker.filterExact(bioMarker);
-            smartRUtils.unique(smartRUtils.getValuesForDimension(bySubset, true)).forEach(function(subset) {
-                bySubset.filterExact(subset);
                 plotData.push({
                     type: 'box',
                     y: smartRUtils.getValuesForDimension(byValue),
-                    name: bioMarker + ' s' + subset,
+                    name: bioMarker,
                     boxpoints: 'all',
                     boxmean: 'sd',
                     jitter: 0.5
                 });
-                bySubset.filterAll();
-            });
             byBioMarker.filterAll();
         });
-        
+
+        var title = 'Boxplots (' + scope.data.transformation + ')';
+        title += scope.data.pValue ? ' ANOVA pValue = ' + scope.data.pValue : '';
         var layout = {
-            title: 'Boxplots (' + scope.data.transformation + ')',
+            title: title,
             height: 800
         };
         Plotly.newPlot(vizDiv, plotData, layout);

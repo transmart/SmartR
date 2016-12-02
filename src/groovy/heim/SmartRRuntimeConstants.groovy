@@ -7,9 +7,18 @@ import org.springframework.stereotype.Component
 
 @Component
 class SmartRRuntimeConstants {
+    private static SmartRRuntimeConstants instance;
 
-    public static getInstance() {
-        Holders.applicationContext.getBean(SmartRRuntimeConstants)
+    public static SmartRRuntimeConstants getInstance() {
+        if (instance == null) {
+            synchronized (SmartRRuntimeConstants.class) {
+                if (instance == null) {
+                    instance = new SmartRRuntimeConstants();
+                    instance.grailsApplication = Holders.grailsApplication; // thanks to http://stackoverflow.com/a/24501325/535203 (Holders.applicationContext.getBean("smartRRuntimeConstants") and Holders.applicationContext.getBean(SmartRRuntimeConstants) were failing with "org.springframework.beans.factory.NoSuchBeanDefinitionException: No bean named 'smartRRuntimeConstants' is defined"
+                }
+            }
+        }
+        instance;
     }
 
     @Autowired
@@ -41,4 +50,17 @@ class SmartRRuntimeConstants {
         dir
     }
 
+    File getBaseDir() {
+        def dir = grailsApplication.config.smartR.baseDir
+        if (!dir) {
+            dir = File.createTempDir("smartR", ".baseDir");
+            setBaseDir(dir)
+        }
+        dir as File
+    }
+
+    void setBaseDir(Object dir) {
+        grailsApplication.config.smartR.baseDir = dir as File
+        baseDir // for the side effects
+    }
 }

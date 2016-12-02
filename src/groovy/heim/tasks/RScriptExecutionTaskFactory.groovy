@@ -68,6 +68,7 @@ class RScriptExecutionTaskFactory implements TaskFactory {
                     rServeSession: rServeSession,
                     fileToLoad:    fileToLoad,
                     arguments:     convertArguments(arguments),
+                    constants:     constants,
             )
         } catch (IOException ioe) {
             throw new InvalidArgumentsException("Bad script '$taskName' for " +

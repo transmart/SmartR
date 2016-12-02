@@ -17,7 +17,7 @@ class RScriptOutputManagerSpec extends Specification {
     }
 
     def cleanup() {
-        new File("/tmp/heim/bogusfolder/init/plot.png").delete()
+        new File(SmartRRuntimeConstants.instance.baseDir, "bogusfolder/init/plot.png").delete() // Access to a property of SmartRRuntimeConstants and "instance" mechanism inspired by http://stackoverflow.com/a/13846141/535203
     }
 
     void "test getScriptOutput() returning single plot"() {
@@ -28,7 +28,7 @@ class RScriptOutputManagerSpec extends Specification {
         conn.eval('dev.off()')
         def sessionId = UUID.randomUUID()
         def taskId = UUID.randomUUID()
-        def mngr = new RScriptOutputManager(conn, sessionId, taskId)
+        def mngr = new RScriptOutputManager(conn, sessionId, taskId, SmartRRuntimeConstants.instance)
 
         when: ""
             def result = mngr.downloadFiles()
@@ -36,6 +36,6 @@ class RScriptOutputManagerSpec extends Specification {
             result
             result.size() == 1
             result[0] instanceof File
-            result[0].getAbsolutePath() == "/tmp/heim/$sessionId/$taskId/plot.png"
+            result[0].getAbsolutePath() == SmartRRuntimeConstants.instance.baseDir.toString()+"/$sessionId/$taskId/plot.png"
     }
 }

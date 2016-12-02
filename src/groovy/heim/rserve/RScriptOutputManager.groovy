@@ -1,5 +1,6 @@
 package heim.rserve
 
+import heim.SmartRRuntimeConstants
 import org.rosuda.REngine.Rserve.RConnection
 
 /**
@@ -8,13 +9,15 @@ import org.rosuda.REngine.Rserve.RConnection
 class RScriptOutputManager {
 
     private final RConnection conn
-    private final File baseDir = new File("/tmp/heim") // TODO: should be configurabl;e
+    private final File baseDir
     private final File outputPath
 
     def RScriptOutputManager(RConnection conn,
                              UUID sessionId,
-                             UUID taskId) {
+                             UUID taskId,
+                             SmartRRuntimeConstants constants) {
         this.conn = conn
+        this.baseDir = constants.baseDir
         this.outputPath = generateOutputPath(sessionId, taskId)
     }
 

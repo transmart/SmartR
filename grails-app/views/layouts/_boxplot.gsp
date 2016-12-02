@@ -22,6 +22,14 @@
                          label="Numerical Variables"
                          tooltip="Select one or more numerical variables that you would like to have displayed.">
             </concept-box>
+            <concept-box style="display: inline-block;"
+                         concept-group="fetch.conceptBoxes.groups"
+                         type="LD-categorical"
+                         min="-1"
+                         max="-1"
+                         label="(optional) Categorical Variables"
+                         tooltip="Select one or more categorical variables to group your data.">
+            </concept-box>
             <br/>
             <br/>
             <biomarker-selection biomarkers="fetch.selectedBiomarkers"></biomarker-selection>

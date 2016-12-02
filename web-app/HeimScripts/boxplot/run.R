@@ -14,7 +14,12 @@ main <- function(excludedPatientIDs = integer(), transformation="raw") {
     }
 
     df <- df[!is.infinite(df$value), ]
-
+    if (length(unique(df$bioMarker)) >= 2) {
+        ano <- anova(lm(value ~ bioMarker, data=df))
+        p <- ano[1,5]
+        p <- ifelse(p < .Machine$double.eps, paste("<", as.character(.Machine$double.eps)), p)
+        output$pValue <- p
+    }
     output$dataMatrix <- df
 
     toJSON(output)
@@ -34,7 +39,7 @@ buildCrossfilterCompatibleDf <- function(loaded_variables, fetch_params) {
                      type=character(),
                      subset=integer(),
                      stringsAsFactors=FALSE)
-    
+
     # build big df step by step via binding row-wise every loaded variable
     for (i in 1:length(names(loaded_variables))) {
         variable <- loaded_variables[[i]]
@@ -49,6 +54,7 @@ buildCrossfilterCompatibleDf <- function(loaded_variables, fetch_params) {
             for (rowLabel in unique(variable.df$Row.Label)) {
                 variable.label.df <- variable.df[variable.df$Row.Label == rowLabel, ]
                 bioMarker <- paste(names[i], rowLabel, variable.label.df$Bio.marker[1], sep="--")
+                bioMarker <- paste(bioMarker, " s", subsets[i], sep="")
                 variable.label.df <- variable.label.df[, -c(1,2)]
                 variable.label.df <- data.frame(patientID=as.numeric(as.vector(variable.label.df$patientID)),
                                                 value=as.numeric(as.vector(variable.label.df$value)),
@@ -61,9 +67,10 @@ buildCrossfilterCompatibleDf <- function(loaded_variables, fetch_params) {
                 if (nrow(variable.label.df) == 0) next
                 df <- rbind(df, variable.label.df)
             }
-        } else {
+        } else  if (types[i] == "numeric"){
             variable.df <- data.frame(patientID=as.integer(variable[,1]), value=variable[,2])
             bioMarker <- names[i]
+            bioMarker <- paste(bioMarker, " s", subsets[i], sep="")
             values <- as.numeric(as.vector(variable.df$value))
             # attach additional information
             variable.df <- data.frame(patientID=as.numeric(as.vector(variable.df$patientID)),
@@ -82,6 +89,21 @@ buildCrossfilterCompatibleDf <- function(loaded_variables, fetch_params) {
     # before we are done we assign a unique id to every row to make it easier for the front-end
     df <- cbind(id=1:nrow(df), df)
 
+    groups <- loaded_variables[grep("^groups", names(loaded_variables))]
+    if (length(groups) > 0 ) {
+        subsets <- getSubsets(groups)
+        for (i in 1:length(groups)) {
+            group <- groups[[i]]
+            subset <- subsets[i]
+            na.omit(group)
+            group <- group[group[,2] != "",]
+            groupName <- group[1,2]
+            patients <- group[, "Row.Label"]
+            if (! any(patients %in% df$patientID)) next
+            df[df$patientID %in% patients & df$subset == subset, ]$bioMarker <-
+                paste(df[df$patientID %in% patients & df$subset == subset, ]$bioMarker, groupName, sep=" g:")
+        }
+    }
     df
 }
 

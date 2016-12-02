@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import groovy.transform.TypeChecked
 import groovy.util.logging.Log4j
+import heim.SmartRRuntimeConstants
 import heim.rserve.RFunctionArg
 import heim.rserve.RScriptOutputManager
 import heim.rserve.RServeSession
@@ -25,11 +26,12 @@ class RScriptExecutionTask extends AbstractTask {
     File fileToLoad // absolute
     String function = 'main'
     List<RFunctionArg> arguments
+    SmartRRuntimeConstants constants
 
     @Override
     TaskResult call() throws Exception {
         rServeSession.doWithRConnection { RConnection conn ->
-            def outputManager = new RScriptOutputManager(conn, sessionId, uuid)
+            def outputManager = new RScriptOutputManager(conn, sessionId, uuid, constants)
 
             REXP res = callR(conn)
             List<File> fileNames = outputManager.downloadFiles()
