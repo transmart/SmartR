@@ -12,7 +12,30 @@ window.smartRApp.controller('PPMIDemoController',
             regions: '',
             selectedGenes: '',
             server: "http://bio3.uni.lu/accessDB/accessDB",
+            func_refgene: {
+                exonic: false,
+                intronic: false,
+                upstream: false,
+                downstream: false,
+                splicing: false,
+                intergenetic: false
+            },
+            exonicfunc_refgene: {
+                frameshift_insertion: false,
+                nonframeshift_insertion: false,
+                frameshift_deletion: false,
+                nonframeshift_deletion: false,
+                frameshift_substitution: false,
+                nonframeshift_substitution: false,
+                synonymous_SNV: false,
+                nonsynonymous_SNV: false,
+            },
+            misc: {
+                globalMAF: 0.1,
+                cohortMAF: 0.5
+            },
             invalid: false,
+            running: false
         };
 
         $scope.pdmap = {
@@ -47,7 +70,8 @@ window.smartRApp.controller('PPMIDemoController',
                 !$scope.pdmap.password ||
                 !$scope.pdmap.server ||
                 !$scope.variantDB.data.length ||
-                $scope.messages.finishedRequests !== $scope.messages.totalRequests;
+                $scope.messages.finishedRequests !== $scope.messages.totalRequests ||
+                $scope.variantDB.running;
         };
         $scope.$watch('pdmap', checkPDMapSanity, true);
 
@@ -128,6 +152,26 @@ window.smartRApp.controller('PPMIDemoController',
             return dfd.promise();
         };
 
+        var getFilterString = function() {
+            var filters1 = [];
+            var filters2 = [];
+            var filtersString = '';
+            for (var key1 in $scope.variantDB.func_refgene) {
+                if ($scope.variantDB.func_refgene.hasOwnProperty(key1) && $scope.variantDB.func_refgene[key1]) {
+                    filters1.push(key1);
+                }
+            }
+            for (var key2 in $scope.variantDB.exonicfunc_refgene) {
+                if ($scope.variantDB.exonicfunc_refgene.hasOwnProperty(key2) && $scope.variantDB.exonicfunc_refgene[key2]) {
+                    filters1.push(key2);
+                }
+            }
+
+            filtersString += filters1.length ? '&func_refgene!ov!' + filters1.join(',') : filtersString;
+            filtersString += filters2.length ? '&exonicfunc_refgene!ov!' + filters2.join(',') : filtersString;
+            return filtersString;
+        };
+
         var getVariantDBRequestsForGenes = function(ids) {
             var dfd = $.Deferred();
             var genes = [];
@@ -147,8 +191,8 @@ window.smartRApp.controller('PPMIDemoController',
                 data: {
                     server: $scope.variantDB.server,
                     path: '/variant_all/POST/',
-                    filter_command: 'splitcommand!eq!t&getfields!eq!gene_at_position,start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' + ids.join(',') +
-                        '&variant_genotypes!ov!' + ids.join(',') + '&gene!eq!' + genes.join(','),
+                    filter_command: 'splitcommand!eq!t&getfields!eq!gene_at_position,start,reference,alleleseq,c01,c11&shown_individuals!eq!' + ids.join(',') +
+                        '&c01,c11!ov!' + ids.join(',') + '&gene!eq!' + genes.join(',') + getFilterString()
                 },
                 success: function(res) { dfd.resolve(JSON.parse(res)); },
                 failure: function() { dfd.reject('An error occured when trying to communicate with VariantDB.'); }
@@ -170,9 +214,9 @@ window.smartRApp.controller('PPMIDemoController',
                 data: {
                     server: $scope.variantDB.server,
                     path: '/variant_all/POST/',
-                    filter_command: 'splitcommand!eq!t&getfields!eq!start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' +
-                            ids.join(',') + '&variant_genotypes!ov!' + ids.join(',') + '&chrom!eq!' + chrs.join(',') + '&start!gt!' +
-                            starts.join(',') + '&start!lt!' + stops.join(',')
+                    filter_command: 'splitcommand!eq!t&getfields!eq!start,reference,alleleseq,c01,c11&shown_individuals!eq!' +
+                            ids.join(',') + '&c01,c11!ov!' + ids.join(',') + '&chrom!eq!' + chrs.join(',') + '&start!gt!' +
+                            starts.join(',') + '&start!lt!' + stops.join(',') + getFilterString()
                 },
                 success: function(res) { dfd.resolve(res); },
                 failure: function() { dfd.reject('An error occured when trying to communicate with VariantDB.'); }
@@ -190,8 +234,12 @@ window.smartRApp.controller('PPMIDemoController',
                     path: '/variant_all/POST/',
                     filter_command: request,
                 },
-                success: function(res) { dfd.resolve(res); },
-                failure: function() { dfd.reject('An error occured when trying to communicate with VariantDB.'); }
+                success: function(res) {
+                    dfd.resolve(res);
+                },
+                failure: function() {
+                    dfd.reject('An error occured when trying to communicate with VariantDB.');
+                }
             });
             return dfd.promise();
         };
@@ -239,6 +287,7 @@ window.smartRApp.controller('PPMIDemoController',
         };
 
         var handleError = function(err) {
+            $scope.variantDB.running = false;
             $scope.messages.finishedRequests += 1;
             $scope.messages.error = err;
             $scope.$apply();
@@ -246,8 +295,12 @@ window.smartRApp.controller('PPMIDemoController',
 
         var handleRequests = function(requests, subset, variantDBIDs) {
             if (! requests.length) {
+                $scope.variantDB.running = false;
                 checkPDMapSanity();
                 $scope.$apply();
+                return;
+            }
+            if (! $scope.variantDB.running) { // if error
                 return;
             }
             $.when(getVariantDBData(requests[0])).then(function(data) {
@@ -259,7 +312,6 @@ window.smartRApp.controller('PPMIDemoController',
         };
 
         var cleanup = function() {
-            $scope.pdmap.invalid = true;
             $scope.variantDB.data = [];
             $scope.messages.error = '';
             $scope.messages.totalRequests = 0;
@@ -269,10 +321,11 @@ window.smartRApp.controller('PPMIDemoController',
 
         $scope.fetchVariantDB = function() {
             cleanup();
-            $scope.variantDB.data = [];
+            $scope.variantDB.running = true;
             getTMIDs().then(function(tmIDs) {
                 var subsets = smartRUtils.unique(tmIDs.map(function(d) { return d.subset; }));
                 subsets.forEach(function(subset) {
+                    $scope.variantDB.running = true;
                     var tmSubsetIDs = tmIDs.filter(function(d) { return d.subset === subset; });
                     getVariantDBIDs(tmSubsetIDs).then(function(variantDBIDs) {
                         if ($scope.variantDB.regions) {
