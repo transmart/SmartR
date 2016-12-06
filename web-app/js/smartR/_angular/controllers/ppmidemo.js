@@ -140,7 +140,15 @@ window.smartRApp.controller('PPMIDemoController',
                     filter_command: 'getfields!eq!id,comments&comments!isa!' + tmIDs.map(function(d) { return d.id; }).join(','),
                 },
                 success: function(res) {
-                    var ids = JSON.parse(res).values.map(function(d) { return d[0]; });
+                    var data = JSON.parse(res);
+                    var vIDIdx = data.fields.indexOf('id');
+                    var tmIDIdx = data.fields.indexOf('comments');
+                    var ids = data.values.map(function(d) {
+                        return {
+                            vID: d[vIDIdx],
+                            subset: tmIDs.filter(function(e) { return e.id === d[tmIDIdx]; })[0].subset
+                        };
+                    });
                     if (ids.length) {
                         dfd.resolve(ids);
                     } else {
@@ -172,7 +180,8 @@ window.smartRApp.controller('PPMIDemoController',
             return filtersString;
         };
 
-        var getVariantDBRequestsForGenes = function(ids) {
+        var getVariantDBRequestsForGenes = function(variantDBIDs) {
+            var ids = variantDBIDs.map(function(d) { return d.vID; });
             var dfd = $.Deferred();
             var genes = [];
             if ($scope.variantDB.selectedGenes.length) {
@@ -191,7 +200,7 @@ window.smartRApp.controller('PPMIDemoController',
                 data: {
                     server: $scope.variantDB.server,
                     path: '/variant_all/POST/',
-                    filter_command: 'splitcommand!eq!t&getfields!eq!gene_at_position,start,reference,alleleseq,c01,c11&shown_individuals!eq!' + ids.join(',') +
+                    filter_command: 'splitcommand!eq!t&getfields!eq!gene_at_position,start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' + ids.join(',') +
                         '&c01,c11!ov!' + ids.join(',') + '&gene!eq!' + genes.join(',') + getFilterString()
                 },
                 success: function(res) { dfd.resolve(JSON.parse(res)); },
@@ -202,6 +211,7 @@ window.smartRApp.controller('PPMIDemoController',
         };
 
         var getVariantDBRequestsForRegions = function(ids) {
+            var ids = variantDBIDs.map(function(d) { return d.vID; });
             var dfd = $.Deferred();
             var regions = $scope.variantDB.regions;
             regions = regions.split(',').map(function(d) { return d.trim(); });
@@ -214,7 +224,7 @@ window.smartRApp.controller('PPMIDemoController',
                 data: {
                     server: $scope.variantDB.server,
                     path: '/variant_all/POST/',
-                    filter_command: 'splitcommand!eq!t&getfields!eq!start,reference,alleleseq,c01,c11&shown_individuals!eq!' +
+                    filter_command: 'splitcommand!eq!t&getfields!eq!start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' +
                             ids.join(',') + '&c01,c11!ov!' + ids.join(',') + '&chrom!eq!' + chrs.join(',') + '&start!gt!' +
                             starts.join(',') + '&start!lt!' + stops.join(',') + getFilterString()
                 },
@@ -244,7 +254,7 @@ window.smartRApp.controller('PPMIDemoController',
             return dfd.promise();
         };
 
-        var prepareData = function(data, subset, variantDBIDs) {
+        var _prepareData = function(data, subset, ids) {
             var variantData = JSON.parse(data);
             var indices = {};
             indices['pos'] = variantData.fields.indexOf('start');
@@ -253,7 +263,7 @@ window.smartRApp.controller('PPMIDemoController',
             indices['chr'] = variantData.fields.indexOf('chrom');
             indices['gene'] = variantData.fields.indexOf('gene_at_position');
             indices['ids'] = [];
-            variantDBIDs.forEach(function(variantDBID) {
+            ids.forEach(function(variantDBID) {
                 var idx = variantData.fields.indexOf(variantDBID);
                 if (idx !== -1) {
                     indices['ids'].push(idx);
@@ -269,8 +279,8 @@ window.smartRApp.controller('PPMIDemoController',
                 var variants = indices['ids'].map(function(idIndex) {
                     return d[idIndex];
                 });
-                var frq = variants.filter(function(d) { return d.indexOf('1') !== -1; }).length / variants.length;
-                if (! isNaN(frq) && frq !== 0) {
+                var frq = variants.filter(function(d) { return d.indexOf('1') !== -1; }).length / ids.length;
+                if (! isNaN(frq) && frq !== 0 && frq >= $scope.variantDB.misc.cohortMAF) {
                     $scope.variantDB.data.push({
                         pos: pos,
                         ref: ref,
@@ -281,6 +291,15 @@ window.smartRApp.controller('PPMIDemoController',
                         subset: subset,
                     });
                 }
+            });
+        };
+
+        var prepareData = function(data, variantDBIDs) {
+            var subsets = smartRUtils.unique(variantDBIDs.map(function(d) { return d.subset; }));
+            subsets.forEach(function(subset) {
+                var ids = variantDBIDs.filter(function(d) { return d.subset === subset; })
+                    .map(function(d) { return d.vID; });
+                _prepareData(data, subset, ids);
             });
             checkPDMapSanity();
             $scope.$apply();
@@ -293,9 +312,10 @@ window.smartRApp.controller('PPMIDemoController',
             $scope.$apply();
         };
 
-        var handleRequests = function(requests, subset, variantDBIDs) {
-            if (! requests.length) {
+        var handleRequests = function(requests, variantDBIDs) {
+            if (! requests.length && $scope.messages.finishedRequests === $scope.messages.totalRequests) {
                 $scope.variantDB.running = false;
+                $scope.variantDB.showViz = true;
                 checkPDMapSanity();
                 $scope.$apply();
                 return;
@@ -304,15 +324,16 @@ window.smartRApp.controller('PPMIDemoController',
                 return;
             }
             $.when(getVariantDBData(requests[0])).then(function(data) {
-                prepareData(data, subset, variantDBIDs);
+                prepareData(data, variantDBIDs);
                 $scope.messages.finishedRequests += 1;
                 $scope.$apply();
-                handleRequests(requests.slice(1), subset, variantDBIDs);
+                handleRequests(requests.slice(1), variantDBIDs);
             }, handleError);
         };
 
         var cleanup = function() {
             $scope.variantDB.data = [];
+            $scope.variantDB.showViz = false;
             $scope.messages.error = '';
             $scope.messages.totalRequests = 0;
             $scope.messages.finishedRequests = 0;
@@ -322,28 +343,25 @@ window.smartRApp.controller('PPMIDemoController',
         $scope.fetchVariantDB = function() {
             cleanup();
             $scope.variantDB.running = true;
+            $scope.variantDB.showViz = false;
             getTMIDs().then(function(tmIDs) {
-                var subsets = smartRUtils.unique(tmIDs.map(function(d) { return d.subset; }));
-                subsets.forEach(function(subset) {
-                    $scope.variantDB.running = true;
-                    var tmSubsetIDs = tmIDs.filter(function(d) { return d.subset === subset; });
-                    getVariantDBIDs(tmSubsetIDs).then(function(variantDBIDs) {
-                        if ($scope.variantDB.regions) {
-                            getVariantDBRequestsForRegions(variantDBIDs).then(function(requests) {
-                                $scope.messages.totalRequests += requests.length;
-                                $scope.$apply();
-                                handleRequests(requests, subset, variantDBIDs);
-                            });
-                        } else {
-                            getVariantDBRequestsForGenes(variantDBIDs).then(function(requests) {
-                                $scope.messages.totalRequests += requests.length;
-                                $scope.$apply();
-                                handleRequests(requests, subset, variantDBIDs);
-                            }, handleError);
-                        }
-                    }, handleError);
-                });
-            }, handleError);
+                $scope.variantDB.running = true;
+                getVariantDBIDs(tmIDs).then(function(variantDBIDs) {
+                    if ($scope.variantDB.regions) {
+                        getVariantDBRequestsForRegions(variantDBIDs).then(function(requests) {
+                            $scope.messages.totalRequests += requests.length;
+                            $scope.$apply();
+                            handleRequests(requests, variantDBIDs);
+                        });
+                    } else {
+                        getVariantDBRequestsForGenes(variantDBIDs).then(function(requests) {
+                            $scope.messages.totalRequests += requests.length;
+                            $scope.$apply();
+                            handleRequests(requests, variantDBIDs);
+                        }, handleError);
+                    }
+                }, handleError);
+            });
         };
 
         var _createPDMapLayout = function(subset, identifier) {

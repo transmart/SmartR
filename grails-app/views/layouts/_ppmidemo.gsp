@@ -139,4 +139,6 @@
     <p id="error-msgs">{{messages.error}}</p>
     <p id="loading-msgs">Completed Requests: {{messages.finishedRequests}} / {{messages.totalRequests}}</p>
 </div>
+<br/>
+<ppmi-demo data="variantDB.data" show="variantDB.showViz" style="float: left;"></ppmi-demo>
 </script>
