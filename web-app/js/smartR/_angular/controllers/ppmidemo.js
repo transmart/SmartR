@@ -143,11 +143,15 @@ window.smartRApp.controller('PPMIDemoController',
                     var data = JSON.parse(res);
                     var vIDIdx = data.fields.indexOf('id');
                     var tmIDIdx = data.fields.indexOf('comments');
-                    var ids = data.values.map(function(d) {
-                        return {
-                            vID: d[vIDIdx],
-                            subset: tmIDs.filter(function(e) { return e.id === d[tmIDIdx]; })[0].subset
-                        };
+                    var ids = [];
+                    data.values.forEach(function(d) {
+                        var hits = tmIDs.filter(function(e) { return e.id === d[tmIDIdx]; });
+                        hits.forEach(function(hit) {
+                            ids.push({
+                                vID: d[vIDIdx],
+                                subset: hit.subset
+                            });
+                        });
                     });
                     if (ids.length) {
                         dfd.resolve(ids);
