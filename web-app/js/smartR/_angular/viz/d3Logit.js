@@ -107,9 +107,7 @@ window.smartRApp.directive("logitPlot", [
 					smartRUtils.shortenConcept(xArrLabel) + ": " + raw[i].x.toFixed(3) + "<br>" +
 					smartRUtils.shortenConcept(yArrLabel) + ": " + raw[i].y.toFixed(3) + "<br>" +
 					"Residual: " + residuals[i] + "<br>" +
-					"Patient ID: " + data.data[i].patientID + "<br>" +
-					((data.data[i].annotation)? ("Tag: " + data.data[i].annotation) : ("")) +
-					"</div>";
+					"Patient ID: " + data.data[i].patientID + "</div>";
 			}
 		}
 
@@ -202,7 +200,7 @@ window.smartRApp.directive("logitPlot", [
 				.y(function(d){ return d.ploty; })
 				.interpolate("cardinal");
 
-			var path = svg.append("g")
+			svg.append("g")
 				.append("path")
 				.attr("class", "logit-curve")
 				.attr("d", lineGen(dataSorted));
@@ -224,7 +222,7 @@ window.smartRApp.directive("logitPlot", [
 				"Residual Range: " + residualrange
 			];
 
-			if(data.forceNormalize[0] && (data.transformationy[0] == "raw")){
+			if(data.forceNormalize[0] && (data.transformationy[0] === "raw")){
 				labels.push("Values Normalized to Range [0, 1]");
 			}
 
@@ -245,13 +243,6 @@ window.smartRApp.directive("logitPlot", [
 
 			legend.exit()
 				.remove();
-		}
-
-		function fade(data, range){
-			var rmin = range.min;
-			var rmax = range.max;
-			var value = Math.min(Math.abs(data-rmin)/(rmax - rmin), 1.);
-			return value;
 		}
 
 		function updateRegression(patientIDs, data, init){
@@ -293,7 +284,7 @@ window.smartRApp.directive("logitPlot", [
 				.html(function(d){ return d; });
 
 			svg.call(tip);
-			var points = svg.append("g")
+			svg.append("g")
 				.selectAll("circle")
 				.data(data)
 				.enter()
@@ -333,33 +324,35 @@ window.smartRApp.directive("logitPlot", [
 			
 			var margin = dimensions.margin;
 			var origin = dimensions.origin;
-
-			var width = dimensions.width;
 			var height = dimensions.height;
 
 			var countx = [];
 			var county = [];
-			for(var i=0;  i<data.length; ++i){
+
+			var filterx = function(d){ return (d.plotx === dix); };
+			var filtery = function(d){ return (d.ploty === diy); };
+
+			for(var i=0; i<data.length; ++i){
 				var dix = data[i].plotx;
 				var diy = data[i].ploty;
-				countx.push({value: dix, count: data.filter(function(d){ return (d.plotx == dix); }).length });
-				county.push({value: diy, count: data.filter(function(d){ return (d.ploty == diy); }).length });
+				countx.push({value: dix, count: data.filter(filterx).length });
+				county.push({value: diy, count: data.filter(filtery).length });
 			}
 			var maxcountX = d3.max(county.map(function(d){ return d.count; }));
 			var maxcountY = d3.max(county.map(function(d){ return d.count; }));
 
-			var histx = svg.append("g")
+			svg.append("g")
 				.selectAll("rect")
 				.data(countx)
 				.enter()
 				.append("rect")
 					.attr("class", "distr-hist")
 					.attr("x", function(d){ return (d.value - histSize/2); })
-					.attr("y", function(d){ return height+origin.y; })
+					.attr("y", function(){ return height+origin.y; })
 					.attr("width", histSize)
 					.attr("height", function(d){ return (d.count/maxcountX)*(margin.top); });
 
-			var histy = svg.append("g")
+			svg.append("g")
 				.selectAll("rect")
 				.data(county)
 				.enter()
@@ -381,8 +374,9 @@ window.smartRApp.directive("logitPlot", [
 			var spacingy = height / ticks; 
 
 			var grid = [];
-			for(var i=0; i<=ticks; ++i)
+			for(var i=0; i<=ticks; ++i){
 				grid.push(i);
+			}
 
 			// x axis grid	
 			svg.append("g")

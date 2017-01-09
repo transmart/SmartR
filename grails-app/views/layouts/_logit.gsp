@@ -14,14 +14,6 @@
                              label="Numerical Variables"
                              tooltip="Select two numerical variables from the tree for plotting.">
                 </concept-box>
-                <concept-box style="display: inline-block;"
-                             concept-group="fetch.conceptBoxes.annotations"
-                             type="LD-categorical"
-                             min="0"
-                             max="-1"
-                             label="(optional) Categorical Variables"
-                             tooltip="Select an arbitrary amount of categorical variables from the tree to annotate the numerical datapoints.">
-                </concept-box>
                 <br/>
                 <br/>
                 <fetch-button concept-map="fetch.conceptBoxes"

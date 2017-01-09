@@ -2,8 +2,7 @@ library(reshape2)
 
 #main <- function(transformation = "raw", selectedPatientIDs = integer() ){
 main <- function(transformationx = "raw", transformationy = "raw", selectedPatientIDs = integer() ){
-    
-    annotations = NULL
+
     df1 = loaded_variables$datapoints_n0_s1 
     df2 = loaded_variables$datapoints_n1_s1
 
@@ -60,19 +59,21 @@ main <- function(transformationx = "raw", transformationy = "raw", selectedPatie
         df$y = y=min(max(df$y, 0), 1)
     }
     if((transformationy == "normalize") || ((transformationy == "raw") && (forceNormalize))){
-        miny = min(df$x)        
-        maxy = max(df$y)        
-        normy = abs(maxy-miny)
+        miny = min(df$y)
+        maxy = max(df$y)
+
+        normy = maxy - miny
+        if(normy == 0){
+            normy = maxy
+        }
         df$y = ((df$y-miny)/normy)
     }  
-
 
 
     # get selected patients
     if(length(selectedPatientIDs) > 0){
         df <- df[df$patientID %in% selectedPatientIDs, ]
     }
-
 
 
     # regression
@@ -92,7 +93,6 @@ main <- function(transformationx = "raw", transformationy = "raw", selectedPatie
         residuals = glm.out$residuals,
         xArrLabel = fetch_params$ontologyTerms$datapoints_n0$fullName,
         yArrLabel = fetch_params$ontologyTerms$datapoints_n1$fullName,
-        annotations = annotations,
         transformationx = transformationx,
         transformationy = transformationy,
         selected = selectedPatientIDs,
