@@ -137,7 +137,7 @@ window.smartRApp.controller('PPMIDemoController',
                 data: {
                     server: $scope.variantDB.server,
                     path: '/individuals/POST/',
-                    filter_command: 'getfields!eq!id,comments&comments!isa!' + tmIDs.map(function(d) { return d.id; }).join(','),
+                    filter_command: 'getfields!eq!id,comments&comments!eqa!' + tmIDs.map(function(d) { return d.id; }).map(function(d) { return d.toLowerCase(); }).join(','),
                 },
                 success: function(res) {
                     var data = JSON.parse(res);
