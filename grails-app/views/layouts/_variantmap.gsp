@@ -157,7 +157,7 @@
             </div>
 
             <div>
-                <label for="pdmap-server">Server: </label>
+                <label for="pdmap-server">VariantDB Endpoint: </label>
                 <input id="pdmap-server" type="text" ng-model="pdmap.server"/>
             </div>
         </div>
