@@ -7,6 +7,26 @@ window.smartRApp.controller('VariantMapController',
 
         commonWorkflowService.initializeWorkflow('variantmap', $scope);
 
+        $scope.fetch = {
+            disabled: false,
+            running: false,
+            loaded: false,
+            conceptBoxes: {
+                datapoints: {concepts: [], valid: false},
+                annotations: {concepts: [], valid: true}
+            }
+        };
+
+        $scope.runAnalysis = {
+            disabled: true,
+            running: false,
+            scriptResults: {},
+            params: {
+                method: 'pearson',
+                transformation: 'raw'
+            }
+        };
+
         $scope.variantDB = {
             data: [],
             regions: '',
