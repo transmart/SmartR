@@ -1,11 +1,11 @@
-//# sourceURL=ppmidemo.js
+//# sourceURL=variantmap.js
 
 'use strict';
 
-window.smartRApp.controller('PPMIDemoController',
+window.smartRApp.controller('VariantMapController',
     ['$scope', 'smartRUtils', 'commonWorkflowService', function($scope, smartRUtils, commonWorkflowService) {
 
-        commonWorkflowService.initializeWorkflow('ppmidemo', $scope);
+        commonWorkflowService.initializeWorkflow('variantmap', $scope);
 
         $scope.variantDB = {
             data: [],
