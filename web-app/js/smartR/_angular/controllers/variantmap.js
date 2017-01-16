@@ -12,9 +12,11 @@ window.smartRApp.controller('VariantMapController',
             running: false,
             loaded: false,
             conceptBoxes: {
-                datapoints: {concepts: [], valid: false},
-                annotations: {concepts: [], valid: true}
-            }
+                highDimensional: {concepts: [], valid: true},
+                numeric: {concepts: [], valid: true},
+                categoric: {concepts: [], valid: true}
+            },
+            selectedBiomarkers: [],
         };
 
         $scope.runAnalysis = {
