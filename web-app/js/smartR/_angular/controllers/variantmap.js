@@ -31,8 +31,7 @@ window.smartRApp.controller('VariantMapController',
 
         $scope.variantDB = {
             data: [],
-            selectedGenes: '',
-            server: "http://bio3.uni.lu/accessDB/accessDB",
+            server: "http://10.79.2.77/accessDB",
             func_refgene: {
                 exonic: false,
                 intronic: false,
@@ -65,10 +64,6 @@ window.smartRApp.controller('VariantMapController',
             servlet: "/galaxy.xhtml",
             model: 'pdmap_dec15',
             invalid: true,
-        };
-
-        $scope.intersection = {
-            genes: []
         };
 
         $scope.messages = {
@@ -167,16 +162,7 @@ window.smartRApp.controller('VariantMapController',
         var getVariantDBRequestsForGenes = function(variantDBIDs) {
             var ids = variantDBIDs.map(function(d) { return d.vID; });
             var dfd = $.Deferred();
-            var genes = [];
-            if ($scope.variantDB.selectedGenes.length) {
-                genes = $scope.variantDB.selectedGenes.split(',').map(function(d) { return d.trim().toLowerCase(); })
-                    .filter(function(d) { return $scope.intersection.genes.indexOf(d) !== -1; });
-                if (! genes.length) {
-                    dfd.reject("None of the specified genes could be found in VariantDB.");
-                }
-            } else {
-                genes = $scope.intersection.genes;
-            }
+            var genes = $scope.fetch.selectedBiomarkers.map(function(d) { return d.name.toLowerCase(); });
 
             $.ajax({
                 url: pageInfo.basePath + '/SmartR/variantDB',
@@ -240,7 +226,7 @@ window.smartRApp.controller('VariantMapController',
                     return d[idIndex];
                 });
                 var frq = variants.filter(function(d) { return d.indexOf('1') !== -1; }).length / ids.length;
-                if (! isNaN(frq) && frq !== 0 && frq >= $scope.variantDB.misc.cohortMAF) {
+                if (! isNaN(frq) && frq !== 0) {
                     $scope.variantDB.data.push({
                         pos: pos,
                         ref: ref,
@@ -261,8 +247,6 @@ window.smartRApp.controller('VariantMapController',
                     .map(function(d) { return d.vID; });
                 _prepareData(data, subset, ids);
             });
-            checkPDMapSanity();
-            $scope.$apply();
         };
 
         var handleError = function(err) {
@@ -275,8 +259,6 @@ window.smartRApp.controller('VariantMapController',
         var handleRequests = function(requests, variantDBIDs) {
             if (! requests.length && $scope.messages.finishedRequests === $scope.messages.totalRequests) {
                 $scope.variantDB.running = false;
-                checkPDMapSanity();
-                $scope.$apply();
                 return;
             }
             if (! $scope.variantDB.running) { // if error
@@ -300,6 +282,10 @@ window.smartRApp.controller('VariantMapController',
 
         $scope.fetchVariantDB = function() {
             cleanup();
+            if (!$scope.fetch.selectedBiomarkers.length) {
+                $scope.messages.error = 'You must select one or more genes to continue.';
+                return;
+            }
             $scope.variantDB.running = true;
             getTMIDs().then(function(tmIDs) {
                 $scope.variantDB.running = true;

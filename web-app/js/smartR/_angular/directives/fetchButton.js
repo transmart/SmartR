@@ -52,9 +52,9 @@ window.smartRApp.directive('fetchButton', [
                 // completion. FIXME
                 scope.$watch('summaryData', function(newValue) {
                     if (scope.summaryData &&
-                            scope.showSummaryStats &&
-                            scope.running &&
-                            Object.keys(newValue).indexOf('subsets') !== -1) {
+                        scope.showSummaryStats &&
+                        scope.running &&
+                        Object.keys(newValue).indexOf('subsets') !== -1) {
                         scope.allSamples = newValue.allSamples;
                         scope.numberOfRows = newValue.numberOfRows;
                         _onSuccess();
@@ -109,7 +109,7 @@ window.smartRApp.directive('fetchButton', [
 
                     if (scope.allowedCohorts.indexOf(cohorts) === -1) {
                         _onFailure('This workflow requires ' + scope.allowedCohorts +
-                                   ' cohort(s), but you selected ' + cohorts);
+                            ' cohort(s), but you selected ' + cohorts);
                         return;
                     }
 
@@ -121,23 +121,22 @@ window.smartRApp.directive('fetchButton', [
                     }
 
                     var conceptKeys = smartRUtils.conceptBoxMapToConceptKeys(scope.conceptMap);
-                    if ($.isEmptyObject(conceptKeys)) {
-                        _onFailure('No concepts selected!');
+                    if ($.isEmptyObject(conceptKeys) && !scope.biomarkers.length) {
+                        _onFailure('No concepts or genes selected!');
                         return;
                     }
 
-                    var dataConstraints = _getDataConstraints(scope.biomarkers);
-
-                    deleteReq.then(
-                        rServeService.loadDataIntoSession(conceptKeys, dataConstraints, scope.projection).then(
-                            scope.showSummaryStats ? _showSummaryStats : _onSuccess,
+                    if (!$.isEmptyObject(conceptKeys)) {
+                        var dataConstraints = _getDataConstraints(scope.biomarkers);
+                        deleteReq.then(
+                            rServeService.loadDataIntoSession(conceptKeys, dataConstraints, scope.projection).then(
+                                scope.showSummaryStats ? _showSummaryStats : _onSuccess,
+                                _onFailure
+                            ),
                             _onFailure
-                        ),
-                        _onFailure
-                    );
-
-
-            };
-        }
-    };
+                        );
+                    }
+                };
+            }
+        };
     }]);
