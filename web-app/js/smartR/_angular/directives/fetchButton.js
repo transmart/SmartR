@@ -39,6 +39,7 @@ window.smartRApp.directive('fetchButton', [
                     scope.loaded = true;
                     scope.disabled = false;
                     scope.running = false;
+                    scope.$apply();
                 };
 
                 var _onFailure = function(msg) {
@@ -46,6 +47,7 @@ window.smartRApp.directive('fetchButton', [
                     scope.loaded = false;
                     scope.disabled = false;
                     scope.running = false;
+                    scope.$apply();
                 };
 
                 // we add this conditional $watch because there is some crazy promise resolving for allSamples
@@ -136,6 +138,8 @@ window.smartRApp.directive('fetchButton', [
                                         scope.showSummaryStats ? _showSummaryStats : _onSuccess,
                                         _onFailure
                                     );
+                                } else {
+                                    _onSuccess();
                                 }
                             } else {
                                 rServeService.loadDataIntoSession(conceptKeys, dataConstraints, scope.projection).then(
@@ -145,6 +149,8 @@ window.smartRApp.directive('fetchButton', [
                                                 scope.showSummaryStats ? _showSummaryStats : _onSuccess,
                                                 _onFailure
                                             );
+                                        } else {
+                                            _onSuccess();
                                         }
                                     },
                                     _onFailure
