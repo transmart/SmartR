@@ -68,10 +68,23 @@ window.smartRApp.controller('VariantMapController',
 
         $scope.messages = {
             error: "",
-            loading: "",
-            totalRequests: 0,
-            finishedRequests: 0,
         };
+
+        $scope.$watchGroup(['fetch.running', 'runAnalysis.running'],
+            function(newValues) {
+                var fetchRunning = newValues[0],
+                    runAnalysisRunning = newValues[1];
+
+                // clear old results
+                if (fetchRunning) {
+                    $scope.runAnalysis.scriptResults = {};
+                }
+
+                // disable tabs when certain criteria are not met
+                $scope.fetch.disabled = runAnalysisRunning;
+                $scope.runAnalysis.disabled = fetchRunning;
+            }
+        );
 
         var getTMIDs = function() {
             var dfd = $.Deferred();
@@ -249,54 +262,40 @@ window.smartRApp.controller('VariantMapController',
             });
         };
 
-        var handleError = function(err) {
-            $scope.variantDB.running = false;
-            $scope.messages.finishedRequests += 1;
-            $scope.messages.error = err;
-            $scope.$apply();
-        };
-
-        var handleRequests = function(requests, variantDBIDs) {
-            if (! requests.length && $scope.messages.finishedRequests === $scope.messages.totalRequests) {
-                $scope.variantDB.running = false;
-                return;
+        var handleRequests = function(requests, variantDBIDs, dfd) {
+            if (! requests.length) {
+                dfd.resolve();
+            } else {
+                $.when(getVariantDBData(requests[0])).then(function(data) {
+                    prepareData(data, variantDBIDs);
+                    handleRequests(requests.slice(1), variantDBIDs, dfd);
+                }, function(err) {
+                    $scope.messages.error += '<br/>' + err;
+                });
             }
-            if (! $scope.variantDB.running) { // if error
-                return;
-            }
-            $.when(getVariantDBData(requests[0])).then(function(data) {
-                prepareData(data, variantDBIDs);
-                $scope.messages.finishedRequests += 1;
-                $scope.$apply();
-                handleRequests(requests.slice(1), variantDBIDs);
-            }, handleError);
         };
 
         var cleanup = function() {
             $scope.variantDB.data = [];
             $scope.messages.error = '';
-            $scope.messages.totalRequests = 0;
-            $scope.messages.finishedRequests = 0;
-            $scope.messages.loading = '';
         };
 
         $scope.fetchVariantDB = function() {
+            var dfd = $.Deferred();
             cleanup();
             if (!$scope.fetch.selectedBiomarkers.length) {
-                $scope.messages.error = 'You must select one or more genes to continue.';
-                return;
+                dfd.reject('You must select one or more genes to continue.');
+            } else {
+                getTMIDs().then(function(tmIDs) {
+                    getVariantDBIDs(tmIDs).then(function(variantDBIDs) {
+                        getVariantDBRequestsForGenes(variantDBIDs).then(function(requests) {
+                            $scope.$apply();
+                            handleRequests(requests, variantDBIDs, dfd);
+                        }, dfd.reject);
+                    }, dfd.reject);
+                });
             }
-            $scope.variantDB.running = true;
-            getTMIDs().then(function(tmIDs) {
-                $scope.variantDB.running = true;
-                getVariantDBIDs(tmIDs).then(function(variantDBIDs) {
-                    getVariantDBRequestsForGenes(variantDBIDs).then(function(requests) {
-                        $scope.messages.totalRequests += requests.length;
-                        $scope.$apply();
-                        handleRequests(requests, variantDBIDs);
-                    }, handleError);
-                }, handleError);
-            });
+            return dfd.promise();
         };
 
         var _createPDMapLayout = function(subset, identifier) {

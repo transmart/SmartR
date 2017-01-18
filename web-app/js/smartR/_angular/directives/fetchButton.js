@@ -22,7 +22,8 @@ window.smartRApp.directive('fetchButton', [
                 projection: '@?',
                 disabled: '=?',
                 message: '=?',
-                hasPreprocessTab: '=?'
+                hasPreprocessTab: '=?',
+                callback: '&?',
             },
             templateUrl: $rootScope.smartRPath +  '/js/smartR/_angular/templates/fetchButton.html',
             link: function(scope, element) {
@@ -126,16 +127,31 @@ window.smartRApp.directive('fetchButton', [
                         return;
                     }
 
-                    if (!$.isEmptyObject(conceptKeys)) {
-                        var dataConstraints = _getDataConstraints(scope.biomarkers);
-                        deleteReq.then(
-                            rServeService.loadDataIntoSession(conceptKeys, dataConstraints, scope.projection).then(
-                                scope.showSummaryStats ? _showSummaryStats : _onSuccess,
-                                _onFailure
-                            ),
-                            _onFailure
-                        );
-                    }
+                    var dataConstraints = _getDataConstraints(scope.biomarkers);
+                    deleteReq.then(
+                        function() {
+                            if ($.isEmptyObject(conceptKeys)) {
+                                if (scope.callback) {
+                                    scope.callback()().then(
+                                        scope.showSummaryStats ? _showSummaryStats : _onSuccess,
+                                        _onFailure
+                                    );
+                                }
+                            } else {
+                                rServeService.loadDataIntoSession(conceptKeys, dataConstraints, scope.projection).then(
+                                    function() {
+                                        if (scope.callback) {
+                                            scope.callback()().then(
+                                                scope.showSummaryStats ? _showSummaryStats : _onSuccess,
+                                                _onFailure
+                                            );
+                                        }
+                                    },
+                                    _onFailure
+                                );
+                            }
+                        }, _onFailure
+                    );
                 };
             }
         };

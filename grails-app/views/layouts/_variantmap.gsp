@@ -126,19 +126,18 @@
 
         <hr class="sr-divider">
         <fetch-button
+                callback="fetchVariantDB"
                 loaded="fetch.loaded"
                 running="fetch.running"
                 concept-map="fetch.conceptBoxes"
                 biomarkers="fetch.selectedBiomarkers"
                 allowed-cohorts="[1,2]"
                 has-preprocess-tab="false"
-                ng-click="fetchVariantDB()"
                 ng-disabled="!fetch.selectedBiomarkers.length">
         </fetch-button>
         </br>
         <div id="sr-variantmap-messages">
             <p id="error-msgs">{{messages.error}}</p>
-            <p id="loading-msgs">VariantDB Requests: {{messages.finishedRequests}} / {{messages.totalRequests}}</p>
         </div>
         <br/>
     </workflow-tab>
