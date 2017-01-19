@@ -24,13 +24,12 @@ window.smartRApp.controller('VariantMapController',
             running: false,
             scriptResults: {},
             params: {
-                method: 'pearson',
-                transformation: 'raw'
-            }
+                variants: [],
+            },
         };
 
+
         $scope.variantDB = {
-            data: [],
             server: "http://10.79.2.77/accessDB",
             func_refgene: {
                 exonic: false,
@@ -51,10 +50,8 @@ window.smartRApp.controller('VariantMapController',
                 nonsynonymous_SNV: false,
             },
             misc: {
-                globalMAF: 0.1
+                globalMAF: 0.2,
             },
-            invalid: false,
-            running: false
         };
 
         $scope.pdmap = {
@@ -63,7 +60,6 @@ window.smartRApp.controller('VariantMapController',
             server: "http://pg-sandbox.uni.lu/minerva",
             servlet: "/galaxy.xhtml",
             model: 'pdmap_dec15',
-            invalid: true,
         };
 
         $scope.messages = {
@@ -82,7 +78,7 @@ window.smartRApp.controller('VariantMapController',
 
                 // disable tabs when certain criteria are not met
                 $scope.fetch.disabled = runAnalysisRunning;
-                $scope.runAnalysis.disabled = fetchRunning;
+                $scope.runAnalysis.disabled = fetchRunning || !$scope.fetch.loaded;
             }
         );
 
@@ -169,6 +165,7 @@ window.smartRApp.controller('VariantMapController',
 
             filtersString += filters1.length ? '&func_refgene!ov!' + filters1.join(',') : filtersString;
             filtersString += filters2.length ? '&exonicfunc_refgene!ov!' + filters2.join(',') : filtersString;
+            filtersString += '&field_1000g2015aug_eur,exac_all,esp6500si_ea!lt!' + $scope.variantDB.misc.globalMAF;
             return filtersString;
         };
 
@@ -239,15 +236,19 @@ window.smartRApp.controller('VariantMapController',
                     return d[idIndex];
                 });
                 var frq = variants.filter(function(d) { return d.indexOf('1') !== -1; }).length / ids.length;
-                if (! isNaN(frq) && frq !== 0) {
-                    $scope.variantDB.data.push({
-                        pos: pos,
-                        ref: ref,
-                        alt: alt,
-                        chr: chr,
-                        frq: frq,
-                        gene: gene,
-                        subset: subset,
+                if (! isNaN(frq) && frq > 0) {
+                    variants.forEach(function(variant, idx) {
+                        $scope.runAnalysis.params.variants.push({
+                            id: ids[idx],
+                            gene: gene,
+                            pos: pos,
+                            ref: ref,
+                            alt: alt,
+                            chr: chr,
+                            var: variant,
+                            frq: frq,
+                            subset: subset,
+                        });
                     });
                 }
             });

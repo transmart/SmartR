@@ -119,7 +119,7 @@
                 <p>Frequency:</p>
                 <div>
                     <label for="sr-variantmap-global-maf">MAF (lower than)</label>
-                    <input id="sr-variantmap-global-maf" type="number" min="0" max="1" step="0.05" ng-model="variantDB.misc.globalMAF" style="width: 40px;"/>
+                    <input id="sr-variantmap-global-maf" type="number" min="0.2" max="1" step="0.05" ng-model="variantDB.misc.globalMAF" style="width: 40px;"/>
                 </div>
             </div>
         </div>
