@@ -142,26 +142,6 @@
         <br/>
     </workflow-tab>
     <workflow-tab tab-name="Run Analysis" disabled="runAnalysis.disabled">
-        <div id="sr-variantmap-pdmap-form">
-            <div>
-                <button ng-click="createPDMapLayout()" ng-disabled="pdmap.invalid">Create PDMap Overlay</button>
-            </div>
-
-            <div>
-                <label for="pdmap-user">UserID: </label>
-                <input id="pdmap-user" type="text" ng-model="pdmap.user"/>
-            </div>
-
-            <div>
-                <label for="pdmap-password">Password: </label>
-                <input id="pdmap-password" type="password" ng-model="pdmap.password"/>
-            </div>
-
-            <div>
-                <label for="pdmap-server">VariantDB Endpoint: </label>
-                <input id="pdmap-server" type="text" ng-model="pdmap.server"/>
-            </div>
-        </div>
         <run-button button-name="Create Plot"
                     store-results-in="runAnalysis.scriptResults"
                     script-to-run="run"
