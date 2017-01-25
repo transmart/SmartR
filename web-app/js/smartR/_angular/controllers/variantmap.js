@@ -215,10 +215,10 @@ window.smartRApp.controller('VariantMapController',
         var _prepareData = function(data, subset, subsetIDs) {
             var variantData = JSON.parse(data);
             var indices = {};
-            indices['pos'] = variantData.fields.indexOf('start');
-            indices['ref'] = variantData.fields.indexOf('reference');
-            indices['alt'] = variantData.fields.indexOf('alleleseq');
-            indices['chr'] = variantData.fields.indexOf('chrom');
+            indices['POS'] = variantData.fields.indexOf('start');
+            indices['REF'] = variantData.fields.indexOf('reference');
+            indices['ALT'] = variantData.fields.indexOf('alleleseq');
+            indices['CHROM'] = variantData.fields.indexOf('chrom');
             indices['gene'] = variantData.fields.indexOf('gene_at_position');
             indices['ids'] = [];
             subsetIDs.forEach(function(id) {
@@ -229,13 +229,16 @@ window.smartRApp.controller('VariantMapController',
             });
 
             variantData.values.forEach(function(d) {
-                var pos = d[indices['pos']];
-                var ref = d[indices['ref']];
-                var alt = d[indices['alt']];
-                var chr = d[indices['chr']];
+                var POS = d[indices['POS']];
+                var REF = d[indices['REF']];
+                var ALT = d[indices['ALT']];
+                var CHROM = d[indices['CHROM']];
                 var gene = d[indices['gene']];
                 var variants = indices['ids'].map(function(idIndex) {
-                    return d[idIndex];
+                    var variant = d[idIndex];
+                    var matches = variant.match(/1/g);
+                    var count = matches || 0;
+                    return (count === 2 ? 1 : 0) + '|' + (count > 0 ? 1 : 0);
                 });
                 var frq = variants.filter(function(d) { return d.indexOf(1) !== -1; }).length / subsetIDs.length;
                 if (! isNaN(frq) && frq > 0) {
@@ -244,12 +247,12 @@ window.smartRApp.controller('VariantMapController',
                             return;
                         }
                         $scope.runAnalysis.params.variants.push({
-                            id: subsetIDs[idx].subject,
+                            subject: subsetIDs[idx].subject,
                             gene: gene,
-                            pos: pos,
-                            ref: ref,
-                            alt: alt,
-                            chr: chr,
+                            POS: POS,
+                            REF: REF,
+                            ALT: ALT,
+                            CHROM: CHROM,
                             var: variant,
                             frq: frq,
                             subset: subset,
@@ -311,7 +314,7 @@ window.smartRApp.controller('VariantMapController',
 
             $scope.variantDB.data.forEach(function(d) {
                 if (d.subset === subset) {
-                    expression_value += d.pos + '\t' + d.ref + '\t' + d.alt + '\t' + d.gene + '\t' + d.chr + '\t' + d.frq + '\n';
+                    expression_value += d.POS + '\t' + d.REF + '\t' + d.ALT + '\t' + d.gene + '\t' + d.CHROM + '\t' + d.frq + '\n';
                 }
             });
 
