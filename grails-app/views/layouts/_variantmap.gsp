@@ -7,7 +7,7 @@
             concept-group="fetch.conceptBoxes.highDimensional"
             type="HD"
             min="0"
-            max="-1"
+            max="1"
             label="(optional) High Dimensional Variables"
             tooltip="Select high dimensional data node(s) from the data tree and drag it into the box.
             The nodes need to be from the same platform.">
