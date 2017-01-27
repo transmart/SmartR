@@ -1,0 +1,96 @@
+.display-aside  {
+	float: left;
+	margin: 10px 0 0 0;
+	width: 100%;
+}
+
+.display-aside:last-of-type {
+	margin-bottom: 10px;
+}
+
+.display-aside  .sr-input-area {
+	float: left;
+	margin: 0 25px 0 0;
+}
+
+.active {
+	opacity: 0.7;
+}
+
+.inactive {
+	opacity: 0.1;
+}
+
+survival-plot .axis-label {
+	font-size: 14px;
+	font-weight: bold;
+	text-anchor: middle;
+}
+
+survival-plot .tooltip {
+	background-color: #D5D5D5;
+	border-radius: 5px;
+	color: black;
+	opacity: 0;
+	padding: 8px;
+	position: absolute;
+}
+
+survival-plot .axis path,
+survival-plot .axis line {
+	fill: none;
+	stroke: black;
+}
+
+survival-plot .axis .tick:first-of-type line {
+	fill: black;
+	opacity: 1;
+}
+
+survival-plot .tick line {
+	opacity: 0.2;
+}
+
+survival-plot h1 {
+	font-size: 20px;
+	margin: 0 0 10px 0;
+}
+
+survival-plot .sr-survival-table {
+	border-collapse: collapse;
+	margin: 0 0 20px 0;
+}
+
+survival-plot .sr-survival-table td,
+survival-plot .sr-survival-table th {
+	border: solid 1px black;
+	padding: 8px;
+	text-align: center;
+}
+
+survival-plot .sr-survival-table thead tr {
+	background-color: #D5D5D5;
+}
+
+survival-plot .sr-survival-table thead tr th {
+	font-weight: bold;
+}
+
+survival-plot .sr-survival-table tbody tr:nth-of-type(even) {
+	background-color: #F2F2F2;
+}
+
+survival-plot table#statistics1 tr td:first-of-type {
+	background-color: #D5D5D5;
+	font-weight: bold;
+	text-align: left;
+}
+
+survival-plot .legend-box,
+survival-plot .legend-text {
+	opacity: 0.7;
+}
+
+survival-plot .legend-box:hover {
+	cursor: pointer;
+}
