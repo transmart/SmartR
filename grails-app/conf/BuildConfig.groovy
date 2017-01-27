@@ -52,6 +52,7 @@ grails.project.dependency.resolution = {
         compile 'net.sf.opencsv:opencsv:2.3'
         compile 'org.rosuda:Rserve:1.7.3'
         compile 'org.mapdb:mapdb:0.9.10'
+        compile 'org.apache.commons:commons-lang3:3.4'
 
         /* serializable ImmutableMap only on guava 16 */
         compile group: 'com.google.guava', name: 'guava', version: '16.0-dev-20140115-68c8348'
@@ -59,6 +60,7 @@ grails.project.dependency.resolution = {
         //test 'com.jayway.restassured:rest-assured:2.4.1'
 
         runtime 'org.javassist:javassist:3.16.1-GA'
+        runtime 'com.ittm_solutions.ipacore:IpaApi:1.0.0'
 
         test('org.gmock:gmock:0.9.0-r435-hyve2') {
             transitive = false /* don't bring groovy-all */

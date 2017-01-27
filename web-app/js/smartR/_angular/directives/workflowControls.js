@@ -14,7 +14,7 @@ window.smartRApp.directive('workflowControls', [
                 var controls = element.children()[0];
                 var scrollbarWidth = smartRUtils.getScrollBarWidth();
                 controls.style.bottom = scrollbarWidth + 'px';
-                controls.style.right = scrollbarWidth + 'px';
+                controls.style.right = scrollbarWidth + 105 + 'px';
             }
         };
     }

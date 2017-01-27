@@ -1,0 +1,63 @@
+<form ng-submit="lauchIpa()">
+    <!-- <form ng-submit="lauchIpa_dummy()">  -->
+    <input type="submit" ng-disabled="differentiallyExpressed == null || differentiallyExpressed.rows.length == 0" value="Launch IPA">
+    <span id="launchIpaMsg">{{ ipaState.launchIpaMsg }}</span> <span class="blink_me" ng-show="ipaState.launchIpaMsgBlink">_</span>
+</form>
+
+<div class="analysisName" ng-style="{'visibility': ipaState.analysisName != null ? 'visible' : 'hidden'}">
+    Analysis name in IPA: {{ ipaState.analysisName }}
+</div>
+
+<div class="ipaResults">
+    <div class="ipatab {{ ipatab == 1 ? 'active' : ''}}" ng-show="differentiallyExpressed != null" ng-click="ipatab = 1">Limma</div>
+    <div class="ipatab {{ ipatab == 2 ? 'active' : ''}}" ng-show="ipaResults != null" ng-click="ipatab = 2">Canonical Pathways</div>
+    <div class="ipatab {{ ipatab == 3 ? 'active' : ''}}" ng-show="ipaResults != null" ng-click="ipatab = 3">Upstream Regulators</div>
+    <div class="ipatab {{ ipatab == 4 ? 'active' : ''}}" ng-show="ipaResults != null" ng-click="ipatab = 4">Tox Functions</div>
+    <div class="ipatab {{ ipatab == 5 ? 'active' : ''}}" ng-show="ipaResults != null" ng-click="ipatab = 5">Networks</div>
+    <div class="ipatab {{ ipatab == 6 ? 'active' : ''}}" ng-show="ipaResults != null" ng-click="ipatab = 6">Diseases and Bio Functions</div>
+    <div class="ipatab {{ ipatab == 7 ? 'active' : ''}}" ng-show="ipaResults != null" ng-click="ipatab = 7">Analysis Ready Molecules</div>
+    <div ng-show="ipatab == 1">
+        <ipa-simple-table
+            simple-table="differentiallyExpressed"
+            id="differentiallyExpressed"
+            numeric-precision="4"
+        />
+    </div>
+    <div ng-show="ipatab == 2">
+        <ipa-simple-table
+            simple-table="canonicalPathways"
+            id="canonicalPathways"
+        />
+    </div>
+    <div ng-show="ipatab == 3">
+        <ipa-simple-table
+            simple-table="upstreamRegulators"
+            id="upstreamRegulators"
+        />
+    </div>
+    <div ng-show="ipatab == 4">
+        <ipa-simple-table
+            simple-table="toxFunctions"
+            id="toxFunctions"
+        />
+    </div>
+    <div ng-show="ipatab == 5">
+        <ipa-simple-table
+            simple-table="networks"
+            id="networks"
+        />
+    </div>
+    <div ng-show="ipatab == 6">
+        <ipa-simple-table
+            simple-table="diseasesAndBioFunctions"
+            id="diseasesAndBioFunctions"
+        />
+    </div>
+    <div ng-show="ipatab == 7">
+        <ipa-simple-table
+            simple-table="analysisReadyMolecules"
+            id="analysisReadyMolecules"
+            numeric-precision="4"
+        />
+    </div>
+</div>
