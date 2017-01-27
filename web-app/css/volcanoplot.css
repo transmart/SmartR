@@ -52,3 +52,9 @@
 .myth, .mytd {
     padding: 5px;
 }
+
+/* control panel */
+.sr-workflow-controls>div {
+    float: right;
+    padding: 5px 15px 5px 15px;
+}
