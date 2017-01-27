@@ -4,7 +4,8 @@
 
 window.smartRApp.directive('volcanoPlot', [
     'smartRUtils',
-    function(smartRUtils) {
+    '$rootScope',
+    function(smartRUtils, $rootScope) {
 
         return {
             restrict: 'E',
@@ -13,22 +14,53 @@ window.smartRApp.directive('volcanoPlot', [
                 width: '@',
                 height: '@'
             },
+            templateUrl: $rootScope.smartRPath +  '/js/smartR/_angular/templates/volcanoplot.html',
             link: function (scope, element) {
-
-                /**
-            * Watch data model (which is only changed by ajax calls when we want to (re)draw everything)
-            */
+                var viz = element.children()[1];
                 scope.$watch('data', function() {
-                    $(element[0]).empty();
+                    $(viz).empty();
                     if (!$.isEmptyObject(scope.data)) {
                         smartRUtils.prepareWindowSize(scope.width, scope.height);
-                        createVolcanoplot(scope, element[0]);
+                        createVolcanoplot(scope, viz);
                     }
                 });
             }
         };
 
         function createVolcanoplot(scope, root) {
+            var keggBtn = smartRUtils.getElementWithoutEventListeners('sr-volcanoplot-kegg-btn');
+            keggBtn.addEventListener('click', function() {
+                var labels = d3.selectAll('.point').filter(function(d) {
+                    return d.negativeLog10PValues >= currentNegLog10P && Math.abs(d.logFC) >= currentLogFC;
+                }).data().map(function(d) { return d.uid; });
+                var genes = [];
+                labels.forEach(function(label) {
+                    var split = label.split("--");
+                    split.shift();
+                    genes = genes.concat(split);
+                });
+
+                var request = $.ajax({
+                    url: pageInfo.basePath + '/SmartR/biocompendium',
+                    type: 'POST',
+                    timeout: 5000,
+                    data: {
+                        genes: genes.join(' ')
+                    }
+                });
+
+                request.then(
+                    function(response) {
+                        var sessionID = response.match(/tmp_\d+/)[0];
+                        var url = 'http://biocompendium.embl.de/' +
+                            'cgi-bin/biocompendium.cgi?section=pathway&pos=0&background=whole_genome&session=' +
+                            sessionID + '&list=gene_list_1__1&list_size=15&org=human';
+                        window.open(url);
+                    },
+                    function(response) { alert("Error:", response); }
+                );
+            });
+
             var uids = scope.data.uids;
             var pValues = scope.data.pvalValues;
             var negativeLog10PValues = scope.data.negativeLog10PvalValues;
@@ -95,21 +127,21 @@ window.smartRApp.directive('volcanoPlot', [
                 .attr('class', 'x axis')
                 .attr('transform', 'translate(0, 0)')
                 .call(d3.svg.axis()
-                .scale(x)
-                .ticks(10)
-                .tickFormat('')
-                .innerTickSize(height)
-                .orient('bottom'));
+                    .scale(x)
+                    .ticks(10)
+                    .tickFormat('')
+                    .innerTickSize(height)
+                    .orient('bottom'));
 
             volcanoplot.append('g')
                 .attr('class', 'y axis')
                 .attr('transform', 'translate(' + width + ',' + 0 + ')')
                 .call(d3.svg.axis()
-                .scale(y)
-                .ticks(10)
-                .tickFormat('')
-                .innerTickSize(width)
-                .orient('left'));
+                    .scale(y)
+                    .ticks(10)
+                    .tickFormat('')
+                    .innerTickSize(width)
+                    .orient('left'));
 
             volcanoplot.append('text')
                 .attr('class', 'text axisText')
@@ -151,7 +183,7 @@ window.smartRApp.directive('volcanoPlot', [
                         return getColor(d);
                     });
 
-                    drawVolcanotable(getTopRankedPoints().data());
+                drawVolcanotable(getTopRankedPoints().data());
             }
 
             var pDrag = d3.behavior.drag()
@@ -219,7 +251,7 @@ window.smartRApp.directive('volcanoPlot', [
                         return getColor(d);
                     });
 
-                    drawVolcanotable(getTopRankedPoints().data());
+                drawVolcanotable(getTopRankedPoints().data());
             }
 
             var lFCDrag = d3.behavior.drag()
@@ -319,24 +351,24 @@ window.smartRApp.directive('volcanoPlot', [
                         return d;
                     });
 
-                    var rows = tbody.selectAll('tr')
-                        .data(points)
-                        .enter()
-                        .append('tr')
-                        .attr('class', 'mytr');
+                var rows = tbody.selectAll('tr')
+                    .data(points)
+                    .enter()
+                    .append('tr')
+                    .attr('class', 'mytr');
 
-                    rows.selectAll('td')
-                        .data(function (row) {
-                            return columns.map(function (column) {
-                                return {column: column, value: row[column]};
-                            });
-                        })
-                        .enter()
-                        .append('td')
-                        .attr('class', 'text mytd')
-                        .text(function (d) {
-                            return d.value;
+                rows.selectAll('td')
+                    .data(function (row) {
+                        return columns.map(function (column) {
+                            return {column: column, value: row[column]};
                         });
+                    })
+                    .enter()
+                    .append('td')
+                    .attr('class', 'text mytd')
+                    .text(function (d) {
+                        return d.value;
+                    });
             }
 
             function updateVolcano() {
@@ -345,34 +377,34 @@ window.smartRApp.directive('volcanoPlot', [
                         return d.uid;
                     });
 
-                    point.enter()
-                        .append('rect')
-                        .attr('class', function(d) { return 'point uid-' + smartRUtils.makeSafeForCSS(d.uid); })
-                        .attr('x', function (d) {
-                            return x(d.logFC) - 2;
-                        })
-                        .attr('y', function (d) {
-                            return y(d.negativeLog10PValues) - 2;
-                        })
-                        .attr('width', 4)
-                        .attr('height', 4)
-                        .style('fill', function (d) {
-                            return getColor(d);
-                        })
-                        .on('mouseover', function (d) {
-                            var html = 'ID: ' + d.uid + '<br/>' +
-                                'p-value: ' + d.pValue + '<br/>' +
-                                '-log10 p: ' + d.negativeLog10PValues + '<br/>' +
-                                'log2FC: ' + d.logFC;
-                            tip.show(html);
-                        })
-                        .on('mouseout', function () {
-                            tip.hide();
-                        });
+                point.enter()
+                    .append('rect')
+                    .attr('class', function(d) { return 'point uid-' + smartRUtils.makeSafeForCSS(d.uid); })
+                    .attr('x', function (d) {
+                        return x(d.logFC) - 2;
+                    })
+                    .attr('y', function (d) {
+                        return y(d.negativeLog10PValues) - 2;
+                    })
+                    .attr('width', 4)
+                    .attr('height', 4)
+                    .style('fill', function (d) {
+                        return getColor(d);
+                    })
+                    .on('mouseover', function (d) {
+                        var html = 'ID: ' + d.uid + '<br/>' +
+                            'p-value: ' + d.pValue + '<br/>' +
+                            '-log10 p: ' + d.negativeLog10PValues + '<br/>' +
+                            'log2FC: ' + d.logFC;
+                        tip.show(html);
+                    })
+                    .on('mouseout', function () {
+                        tip.hide();
+                    });
 
-                        point.exit()
-                            .attr('r', 0)
-                            .remove();
+                point.exit()
+                    .attr('r', 0)
+                    .remove();
             }
 
             updateVolcano();
