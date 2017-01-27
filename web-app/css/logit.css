@@ -1,0 +1,55 @@
+
+
+.point {
+    fill: black;
+    stroke: black;
+}
+
+.point.selected, .point.hover{						
+    fill: white;
+    stroke: black;
+}
+
+.logit-curve {
+    stroke: blue;
+    stroke-width: 3px;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.reference-line {
+    stroke: black;
+    stroke-width: 1;
+    stroke-dasharray: 5, 5;
+    stroke-opacity: 0.75;
+}
+
+.grid-line {
+    stroke: black;
+    stroke-width: 1;
+    fill: block;
+    opacity: 0.25
+}
+
+.distr-hist {
+    fill: blue;
+    opacity: .1;
+    shape-rendering: crispEdges;
+}
+
+.brush .extent {
+    fill: blue;
+    opacity: .125;
+    shape-rendering: crispEdges;
+}
+
+.tick line {
+    shape-rendering: crispEdges;
+    opacity: 0.2;
+}
