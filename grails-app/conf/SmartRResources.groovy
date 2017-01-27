@@ -55,5 +55,6 @@ modules = {
         // volcano
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'volcanoplot.js']
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/viz', file: 'd3Volcanoplot.js']
+        resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'patientmapper.js']
     }
 }
