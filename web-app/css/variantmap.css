@@ -6,3 +6,9 @@
 #variantdb-server {
     width: 300px;
 }
+
+.sr-vm-grid {
+    stroke: #BBB;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+}
