@@ -103,7 +103,35 @@ window.smartRApp.directive('variantMap', [
 
 
             (function drawBoxes() {
+                var subjects = smartRUtils.unique(getValuesForDimension(bySubject));
+                var genes = smartRUtils.unique(getValuesForDimension(byGene));
+                var boxData = [];
+                subjects.forEach(function(subject) {
+                    genes.forEach(function(gene) {
+                        boxData.push({
+                            subject: subject,
+                            gene: gene
+                        });
+                    });
+                });
+                // DATA JOIN
+                var box = svg.selectAll('.sr-vm-box')
+                    .data(boxData, function(d) { return d.subject + ' ' + d.gene; });
 
+                // ENTER g
+                var boxEnter = box.enter()
+                    .append('g')
+                    .attr('class', 'sr-vm-box');
+
+                // ENTER rect
+                boxEnter.append('rect')
+                    .attr('height', boxSize)
+                    .attr('width', boxSize);
+
+                // UPDATE g
+                box.attr('transform', function(d) {
+                    return 'translate(' + (subjects.indexOf(d.subject) * boxSize) + ',' + (genes.indexOf(d.gene) * boxSize) + ')';
+                });
             })();
 
             function getValuesForDimension(dimension, ascendingOrder) {
@@ -119,3 +147,4 @@ window.smartRApp.directive('variantMap', [
         }
 
     }]);
+

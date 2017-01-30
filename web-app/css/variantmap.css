@@ -12,3 +12,10 @@
     stroke-width: 1px;
     shape-rendering: crispEdges;
 }
+
+.sr-vm-box {
+    fill: none;
+    stroke: black;
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+}
