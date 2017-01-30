@@ -30,15 +30,21 @@ window.smartRApp.directive('variantMap', [
             var bySubject = cf.dimension(function(d) { return d.subject; });
             var byGene = cf.dimension(function(d) { return d.gene; });
 
-            var width = 1000;
-            var height = 1000;
+            var subjects = smartRUtils.unique(getValuesForDimension(bySubject));
+            var genes = smartRUtils.unique(getValuesForDimension(byGene));
+
+            var BOX_SIZE = 40;
+            var height = genes.length * BOX_SIZE;
+            var width = subjects.length * BOX_SIZE;
+
             var margin = {
-                top: 200,
-                bottom: 20,
+                top: 20,
+                bottom: 200,
                 right: 20,
-                left: 200
+                left: 50,
             };
-            var boxSize = width / smartRUtils.unique(getValuesForDimension(bySubject)).length;
+
+            smartRUtils.prepareWindowSize(width + margin.left + margin.right, height + margin.top + margin.bottom);
 
             var svg = d3.select(viz).append('svg')
                 .attr('width', width + margin.left + margin.right)
@@ -66,13 +72,14 @@ window.smartRApp.directive('variantMap', [
 
                 // ENTER text
                 verticalGridLineEnter.append('text')
-                    .attr('transform', 'translate(0,' + (height + 5) + ')rotate(45)')
+                    .attr('transform', 'translate(0,' + (height + 10) + ')rotate(45)')
                     .attr('text-anchor', 'start')
+                    .style('font-size', BOX_SIZE / 2 + 'px')
                     .text(function(d) { return d; });
 
                 // UPDATE g
                 verticalGridLine.attr('transform', function(d) {
-                    return 'translate(' + ((subjects.indexOf(d) + 0.5) * boxSize) + ', 0)';
+                    return 'translate(' + ((subjects.indexOf(d) + 0.5) * BOX_SIZE) + ', 0)';
                 });
 
                 // DATA JOIN
@@ -91,13 +98,14 @@ window.smartRApp.directive('variantMap', [
 
                 // ENTER text
                 horizontalGridLineEnter.append('text')
-                    .attr('transform', 'translate(' + (- margin.left) + ', 0)')
+                    .attr('transform', 'translate(-5, ' + (BOX_SIZE / 4) + ')')
                     .attr('text-anchor', 'end')
+                    .style('font-size', (BOX_SIZE / 2) + 'px')
                     .text(function(d) { return d; });
 
                 // UPDATE g
                 horizontalGridLine.attr('transform', function(d) {
-                    return 'translate(0, ' + ((genes.indexOf(d) + 0.5) * boxSize) + ')';
+                    return 'translate(0, ' + ((genes.indexOf(d) + 0.5) * BOX_SIZE) + ')';
                 });
             })();
 
@@ -123,14 +131,23 @@ window.smartRApp.directive('variantMap', [
                     .append('g')
                     .attr('class', 'sr-vm-box');
 
-                // ENTER rect
+                // ENTER rect (main)
                 boxEnter.append('rect')
-                    .attr('height', boxSize)
-                    .attr('width', boxSize);
+                    .attr('height', BOX_SIZE)
+                    .attr('width', BOX_SIZE);
+
+                // ENTER rect (expression box)
+                boxEnter.append('rect')
+                    .attr('height', BOX_SIZE / 4)
+                    .attr('width', BOX_SIZE / 4)
+                    .attr('x', BOX_SIZE / 2)
+                    .style('fill', function(d) {
+                        return '#555';
+                    });
 
                 // UPDATE g
                 box.attr('transform', function(d) {
-                    return 'translate(' + (subjects.indexOf(d.subject) * boxSize) + ',' + (genes.indexOf(d.gene) * boxSize) + ')';
+                    return 'translate(' + (subjects.indexOf(d.subject) * BOX_SIZE) + ',' + (genes.indexOf(d.gene) * BOX_SIZE) + ')';
                 });
             })();
 

@@ -7,13 +7,13 @@
     width: 300px;
 }
 
-.sr-vm-grid {
+.sr-vm-grid line {
     stroke: #BBB;
     stroke-width: 1px;
     shape-rendering: crispEdges;
 }
 
-.sr-vm-box {
+.sr-vm-box rect {
     fill: none;
     stroke: black;
     stroke-width: 1px;
