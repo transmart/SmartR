@@ -6,7 +6,8 @@ window.smartRApp.directive('fetchButton', [
     '$rootScope',
     'rServeService',
     'smartRUtils',
-    function($rootScope, rServeService, smartRUtils) {
+    '$timeout',
+    function($rootScope, rServeService, smartRUtils, $timeout) {
         return {
             restrict: 'E',
             scope: {
@@ -30,24 +31,35 @@ window.smartRApp.directive('fetchButton', [
                 var template_btn = element.children()[0],
                     template_msg = element.children()[1];
 
+                // if callback is not defined assign a dummy, so we can avoid lots of if else
+                if (!scope.callback) {
+                    scope.callback = function() {
+                        return function() {
+                            return $.when();
+                        };
+                    };
+                }
+
                 var _onSuccess = function() {
-                    if (scope.hasPreprocessTab) {
-                        scope.message = 'Task complete! Go to the "Preprocess" or "Run Analysis" tab to continue.';
-                    } else {
-                        scope.message = 'Task complete! Go to the "Run Analysis" tab to continue.';
-                    }
-                    scope.loaded = true;
-                    scope.disabled = false;
-                    scope.running = false;
-                    scope.$apply();
+                    $timeout(function() {
+                        if (scope.hasPreprocessTab) {
+                            scope.message = 'Task complete! Go to the "Preprocess" or "Run Analysis" tab to continue.';
+                        } else {
+                            scope.message = 'Task complete! Go to the "Run Analysis" tab to continue.';
+                        }
+                        scope.loaded = true;
+                        scope.disabled = false;
+                        scope.running = false;
+                    });
                 };
 
                 var _onFailure = function(msg) {
-                    scope.message = 'Error: ' + msg;
-                    scope.loaded = false;
-                    scope.disabled = false;
-                    scope.running = false;
-                    scope.$apply();
+                    $timeout(function() {
+                        scope.message = 'Error: ' + msg;
+                        scope.loaded = false;
+                        scope.disabled = false;
+                        scope.running = false;
+                    });
                 };
 
                 // we add this conditional $watch because there is some crazy promise resolving for allSamples
@@ -133,25 +145,17 @@ window.smartRApp.directive('fetchButton', [
                     deleteReq.then(
                         function() {
                             if ($.isEmptyObject(conceptKeys)) {
-                                if (scope.callback) {
-                                    scope.callback()().then(
-                                        scope.showSummaryStats ? _showSummaryStats : _onSuccess,
-                                        _onFailure
-                                    );
-                                } else {
-                                    _onSuccess();
-                                }
+                                scope.callback()().then(
+                                    scope.showSummaryStats ? _showSummaryStats : _onSuccess,
+                                    _onFailure
+                                );
                             } else {
                                 rServeService.loadDataIntoSession(conceptKeys, dataConstraints, scope.projection).then(
                                     function() {
-                                        if (scope.callback) {
-                                            scope.callback()().then(
-                                                scope.showSummaryStats ? _showSummaryStats : _onSuccess,
-                                                _onFailure
-                                            );
-                                        } else {
-                                            _onSuccess();
-                                        }
+                                        scope.callback()().then(
+                                            scope.showSummaryStats ? _showSummaryStats : _onSuccess,
+                                            _onFailure
+                                        );
                                     },
                                     _onFailure
                                 );
