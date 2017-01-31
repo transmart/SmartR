@@ -32,9 +32,16 @@ window.smartRApp.directive('variantMap', [
 
             var subjects = smartRUtils.unique(getValuesForDimension(bySubject));
             var genes = smartRUtils.unique(getValuesForDimension(byGene));
+            var clinicalFeatures = smartRUtils.unique(scope.data.data.reduce(function(prev, current) {
+                return prev.concat(Object.keys(current));
+            }, [])).filter(function(d) { return d.indexOf('fullName:') !== -1; });
 
             var BOX_SIZE = 40;
-            var height = genes.length * BOX_SIZE;
+            var CLINICAL_BOX_HEIGHT = 10;
+
+            var MAIN_PLOT_OFFSET = clinicalFeatures.length * CLINICAL_BOX_HEIGHT;
+
+            var height = genes.length * BOX_SIZE + MAIN_PLOT_OFFSET;
             var width = subjects.length * BOX_SIZE;
 
             var margin = {
@@ -67,7 +74,7 @@ window.smartRApp.directive('variantMap', [
 
                 // ENTER line
                 verticalGridLineEnter.append('line')
-                    .attr('y1', 0)
+                    .attr('y1', MAIN_PLOT_OFFSET)
                     .attr('y2', height);
 
                 // ENTER text
@@ -79,7 +86,7 @@ window.smartRApp.directive('variantMap', [
 
                 // UPDATE g
                 verticalGridLine.attr('transform', function(d) {
-                    return 'translate(' + ((subjects.indexOf(d) + 0.5) * BOX_SIZE) + ', 0)';
+                    return 'translate(' + ((subjects.indexOf(d) + 0.5) * BOX_SIZE) + ',' + MAIN_PLOT_OFFSET + ')';
                 });
 
                 // DATA JOIN
@@ -105,7 +112,7 @@ window.smartRApp.directive('variantMap', [
 
                 // UPDATE g
                 horizontalGridLine.attr('transform', function(d) {
-                    return 'translate(0, ' + ((genes.indexOf(d) + 0.5) * BOX_SIZE) + ')';
+                    return 'translate(0, ' + ((genes.indexOf(d) + 0.5) * BOX_SIZE + MAIN_PLOT_OFFSET) + ')';
                 });
             })();
 
@@ -200,8 +207,13 @@ window.smartRApp.directive('variantMap', [
 
                 // UPDATE g
                 box.attr('transform', function(d) {
-                    return 'translate(' + (subjects.indexOf(d.subject) * BOX_SIZE) + ',' + (genes.indexOf(d.gene) * BOX_SIZE) + ')';
+                    return 'translate(' + (subjects.indexOf(d.subject) * BOX_SIZE) + ',' +
+                        (genes.indexOf(d.gene) * BOX_SIZE + MAIN_PLOT_OFFSET) + ')';
                 });
+            })();
+
+            (function drawClinicalBoxes() {
+
             })();
 
             function getValuesForDimension(dimension, ascendingOrder) {

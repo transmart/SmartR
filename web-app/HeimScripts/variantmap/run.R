@@ -8,8 +8,8 @@ vcfFile <- "variants.vcf"
 
 main <- function(variants) {
     output <- list()
-    load("/tmp/json.Rda")
-    return(json)
+    # load("/tmp/json.Rda")
+    # return(json)
 
     save(variants, file="/tmp/variants.Rda")
     save(loaded_variables, file="/tmp/loaded_variables.Rda")
@@ -47,6 +47,7 @@ main <- function(variants) {
         cat.idx <- grep("^categoric", names(loaded_variables))
         num.idx <- grep("^numeric", names(loaded_variables))
 
+        # HIGHDIMENSIONAL
         hdd.data <- loaded_variables[hdd.idx]
         hdd.data <- lapply(hdd.data, function(x) {
              names(x) <- sub("^X", "", names(x))
@@ -68,6 +69,21 @@ main <- function(variants) {
         zScore.data <- as.data.frame(zScore.data)
         zScore.data <- melt(zScore.data, id.vars="gene", na.rm=T, variable.name="subject", value.name="zscore")
         data <- merge(data, zScore.data, by=c("subject", "gene"), all.x=T)
+
+        # NUMERIC
+        ldd.data <- loaded_variables[c(num.idx, cat.idx)]
+        ldd.data <- lapply(seq_along(ldd.data), function(data, names, i) {
+                   melt(data[i], id.vars="Row.Label")
+        }, data=ldd.data, names=names(ldd.data))
+        ldd.data <- do.call(rbind, ldd.data)
+        ldd.data <- ldd.data[, -2]
+        names(ldd.data) <- c("subject", "value", "node")
+        fullNames <- do.call(rbind, lapply(fetch_params$ontologyTerms[sub("_s\\d$", "", ldd.data$node)], function(x) x$fullName))
+        fullNames <- paste("fullName:", fullNames)
+        ldd.data$node <- fullNames
+        names(ldd.data)[3] <- "fullName"
+        ldd.data <- dcast(ldd.data, subject~...)
+        data <- merge(data, ldd.data, by="subject", all.x=T)
     } else {
         data <- annotation.data
     }
