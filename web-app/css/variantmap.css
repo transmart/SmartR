@@ -13,9 +13,18 @@
     shape-rendering: crispEdges;
 }
 
-.sr-vm-box rect {
+.sr-vm-box .sr-vm-main-box {
     fill: none;
     stroke: black;
     stroke-width: 1px;
     shape-rendering: crispEdges;
+}
+
+.sr-vm-box .sr-vm-expr-box {
+    stroke: none;
+    fill: none;
+}
+
+.sr-vm-consq-line {
+    stroke-width: 2px;
 }

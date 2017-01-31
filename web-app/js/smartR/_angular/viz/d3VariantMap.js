@@ -40,8 +40,8 @@ window.smartRApp.directive('variantMap', [
             var margin = {
                 top: 20,
                 bottom: 200,
-                right: 20,
-                left: 50,
+                right: 50,
+                left: 100,
             };
 
             smartRUtils.prepareWindowSize(width + margin.left + margin.right, height + margin.top + margin.bottom);
@@ -109,18 +109,51 @@ window.smartRApp.directive('variantMap', [
                 });
             })();
 
+            var redGreenScale = d3.scale.quantile()
+                .domain([0, 1])
+                .range(function() {
+                    var colorSet = [];
+                    var NUM = 100;
+                    var i = NUM;
+                    while (i--) {
+                        colorSet.push(d3.rgb((255 * i) / NUM, 0, 0));
+                    }
+                    i = NUM;
+                    while (i--) {
+                        colorSet.push(d3.rgb(0, (255 * (NUM - i)) / NUM, 0));
+                    }
+                    return colorSet.reverse();
+                }());
 
             (function drawBoxes() {
                 var subjects = smartRUtils.unique(getValuesForDimension(bySubject));
                 var genes = smartRUtils.unique(getValuesForDimension(byGene));
                 var boxData = [];
                 subjects.forEach(function(subject) {
+                    bySubject.filterExact(subject);
                     genes.forEach(function(gene) {
+                        byGene.filterExact(gene);
+                        var hits = bySubject.top(Infinity);
+                        var zscore = hits.length ? hits[0].zscore : undefined;
+                        var consequences = smartRUtils.unique(hits.reduce(function(prev, curr) {
+                            if (curr.consequence) {
+                                return prev.concat(curr.consequence.split(','));
+                            } else {
+                                return prev;
+                            }
+                        }, []));
+                        var aachange = !!consequences.filter(function(consequence) { return consequence !== 'synonymous'; }).length;
                         boxData.push({
                             subject: subject,
-                            gene: gene
+                            gene: gene,
+                            zscore: zscore,
+                            consequences: consequences,
+                            aachange: aachange,
+                            variants: hits.length,
                         });
+                        byGene.filterAll();
                     });
+                    bySubject.filterAll();
                 });
                 // DATA JOIN
                 var box = svg.selectAll('.sr-vm-box')
@@ -133,17 +166,37 @@ window.smartRApp.directive('variantMap', [
 
                 // ENTER rect (main)
                 boxEnter.append('rect')
+                    .attr('class', 'sr-vm-main-box')
                     .attr('height', BOX_SIZE)
                     .attr('width', BOX_SIZE);
 
                 // ENTER rect (expression box)
                 boxEnter.append('rect')
-                    .attr('height', BOX_SIZE / 4)
-                    .attr('width', BOX_SIZE / 4)
+                    .attr('class', 'sr-vm-expr-box')
+                    .attr('height', BOX_SIZE / 2)
+                    .attr('width', BOX_SIZE / 2)
                     .attr('x', BOX_SIZE / 2)
                     .style('fill', function(d) {
-                        return '#555';
+                        return redGreenScale(1 / (1 + Math.pow(Math.E, -d.zscore)));
                     });
+
+                // ENTER line (consequence)
+                boxEnter.append('line')
+                    .attr('class', 'sr-vm-consq-line')
+                    .attr('x1', function(d) { return d.aachange ? BOX_SIZE / 4 : 0; })
+                    .attr('x2', function(d) { return d.aachange ? BOX_SIZE / 4 : BOX_SIZE / 2; })
+                    .attr('y1', function(d) { return d.aachange ? BOX_SIZE / 2 : BOX_SIZE * 3 / 4; })
+                    .attr('y2', function(d) { return d.aachange ? BOX_SIZE : BOX_SIZE * 3 / 4; })
+                    .style('stroke', function(d) { return d.aachange ? '#F00' : '#0F0'; })
+                    .style('visibility', function(d) { return d.variants ? 'visible' : 'hidden'; });
+
+                // ENTER text (variants)
+                boxEnter.append('text')
+                    .attr('x', BOX_SIZE * 3 / 4)
+                    .attr('y', BOX_SIZE - 3)
+                    .style('font-size', BOX_SIZE / 2 + 'px')
+                    .style('text-anchor', 'middle')
+                    .text(function(d) { return d.variants ? d.variants : ''; });
 
                 // UPDATE g
                 box.attr('transform', function(d) {

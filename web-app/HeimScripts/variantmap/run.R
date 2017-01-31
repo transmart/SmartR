@@ -8,10 +8,12 @@ vcfFile <- "variants.vcf"
 
 main <- function(variants) {
     output <- list()
+    load("/tmp/json.Rda")
+    return(json)
 
-    # save(variants, file="/tmp/variants.Rda")
-    # save(loaded_variables, file="/tmp/loaded_variables.Rda")
-    # save(fetch_params, file="/tmp/fetch_params.Rda")
+    save(variants, file="/tmp/variants.Rda")
+    save(loaded_variables, file="/tmp/loaded_variables.Rda")
+    save(fetch_params, file="/tmp/fetch_params.Rda")
 
     vcf <- variants
     names(vcf) <- c("subject", "gene", "POS", "REF", "ALT", "CHROM", "var", "frq", "subset")
@@ -55,11 +57,23 @@ main <- function(variants) {
         names(hdd.data) <- c("Row.Label", "gene", "subject", "expr")
         expression.data <- merge(variants, hdd.data[, -1], by=c("subject", "gene"), all.x=T)
         data <- merge(annotation.data, expression.data, by=c("subject", "chr", "pos"))
+
+        zScore.data <- data[, c(1,6,12)]
+        zScore.data <- zScore.data[!duplicated(zScore.data[, 1:2]), ]
+        zScore.data <- dcast(zScore.data, gene~subject)
+        colNames <- colnames(zScore.data)
+        genes <- zScore.data$gene
+        zScore.data <- cbind(genes, t(apply(zScore.data[,-1], 1, scale)))
+        colnames(zScore.data) <- colNames
+        zScore.data <- as.data.frame(zScore.data)
+        zScore.data <- melt(zScore.data, id.vars="gene", na.rm=T, variable.name="subject", value.name="zscore")
+        data <- merge(data, zScore.data, by=c("subject", "gene"), all.x=T)
     } else {
         data <- annotation.data
     }
 
     output$data <- data
     json <- toJSON(output)
+    save(json, file="/tmp/json.Rda")
     return(json)
 }
