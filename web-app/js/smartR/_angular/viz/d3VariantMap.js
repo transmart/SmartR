@@ -60,9 +60,6 @@ window.smartRApp.directive('variantMap', [
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
             (function drawGrid() {
-                var subjects = smartRUtils.unique(getValuesForDimension(bySubject));
-                var genes = smartRUtils.unique(getValuesForDimension(byGene));
-
                 // DATA JOIN
                 var verticalGridLine = svg.selectAll('.sr-vm-vgrid')
                     .data(subjects);
@@ -74,12 +71,11 @@ window.smartRApp.directive('variantMap', [
 
                 // ENTER line
                 verticalGridLineEnter.append('line')
-                    .attr('y1', MAIN_PLOT_OFFSET)
-                    .attr('y2', height);
+                    .attr('y2', height - MAIN_PLOT_OFFSET);
 
                 // ENTER text
                 verticalGridLineEnter.append('text')
-                    .attr('transform', 'translate(0,' + (height + 10) + ')rotate(45)')
+                    .attr('transform', 'translate(-5,' + (height - MAIN_PLOT_OFFSET + 10) + ')rotate(45)')
                     .attr('text-anchor', 'start')
                     .style('font-size', BOX_SIZE / 2 + 'px')
                     .text(function(d) { return d; });
@@ -133,8 +129,6 @@ window.smartRApp.directive('variantMap', [
                 }());
 
             (function drawBoxes() {
-                var subjects = smartRUtils.unique(getValuesForDimension(bySubject));
-                var genes = smartRUtils.unique(getValuesForDimension(byGene));
                 var boxData = [];
                 subjects.forEach(function(subject) {
                     bySubject.filterExact(subject);
@@ -213,7 +207,45 @@ window.smartRApp.directive('variantMap', [
             })();
 
             (function drawClinicalBoxes() {
+                var clinicalData = [];
+                subjects.forEach(function(subject) {
+                    bySubject.filterExact(subject);
+                    genes.forEach(function(gene) {
+                        byGene.filterExact(gene);
+                        var hit = bySubject.top(Infinity)[0];
+                        clinicalFeatures.forEach(function(feature) {
+                            if (hit && hit[feature]) {
+                                clinicalData.push({
+                                    subject: subject,
+                                    gene: gene,
+                                    feature: feature,
+                                    value: hit[feature],
+                                });
+                            }
+                        });
+                        byGene.filterAll();
+                    });
+                    bySubject.filterAll();
+                });
+                // DATA JOIN
+                var clinicalBox = svg.selectAll('.sr-vm-clinical-box')
+                    .data(clinicalData);
 
+                // ENTER g
+                var clinicalBoxEnter = clinicalBox.enter()
+                    .append('g')
+                    .attr('class', 'sr-vm-clinical-box');
+
+                // ENTER rect
+                clinicalBoxEnter.append('rect')
+                    .attr('height', CLINICAL_BOX_HEIGHT)
+                    .attr('width', BOX_SIZE);
+
+                // UPDATE g
+                clinicalBox.attr('transform', function(d) {
+                    return 'translate(' + (subjects.indexOf(d.subject) * BOX_SIZE) + ',' +
+                        (genes.indexOf(d.gene) * CLINICAL_BOX_HEIGHT) + ')';;
+                });
             })();
 
             function getValuesForDimension(dimension, ascendingOrder) {
