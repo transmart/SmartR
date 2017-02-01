@@ -91,9 +91,10 @@ main <- function(variants) {
         ldd.data <- ldd.data[, -2]
         names(ldd.data) <- c("subject", "value", "node")
         fullNames <- do.call(rbind, lapply(fetch_params$ontologyTerms[sub("_s\\d$", "", ldd.data$node)], function(x) x$fullName))
-        fullNames <- paste("fullName:", fullNames)
-        ldd.data$node <- fullNames
-        names(ldd.data)[3] <- "fullName"
+        types <- sub("_.+", "", ldd.data$node)
+        identifiers <- paste(types, "fullName:", fullNames)
+        ldd.data$node <- identifiers
+        names(ldd.data)[3] <- "identifier"
         ldd.data <- dcast(ldd.data, subject~...)
         data <- merge(data, ldd.data, by="subject", all.x=T)
     } else {

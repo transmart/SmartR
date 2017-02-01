@@ -28,3 +28,8 @@
 .sr-vm-consq-line {
     stroke-width: 2px;
 }
+
+.sr-vm-clinical-box {
+    fill: #3f3673;
+    stroke: white;
+}

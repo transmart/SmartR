@@ -103,7 +103,7 @@ window.smartRApp.directive('variantMap', [
                 horizontalGridLineEnter.append('text')
                     .attr('transform', 'translate(-5, ' + (BOX_SIZE / 4) + ')')
                     .attr('text-anchor', 'end')
-                    .style('font-size', (BOX_SIZE / 2) + 'px')
+                    .style('font-size', (BOX_SIZE * 3 / 4) + 'px')
                     .text(function(d) { return d; });
 
                 // UPDATE g
@@ -236,29 +236,40 @@ window.smartRApp.directive('variantMap', [
             })();
 
             (function drawClinicalBoxes() {
-                var clinicalData = [];
+                var catFeatures = clinicalFeatures.filter(function(d) { return d.indexOf('categoric') !== -1; });
+                var numFeatures = clinicalFeatures.filter(function(d) { return d.indexOf('numeric') !== -1; });
+                var catData = [];
+                var numData = [];
                 subjects.forEach(function(subject) {
                     bySubject.filterExact(subject);
-                    genes.forEach(function(gene) {
-                        byGene.filterExact(gene);
-                        var hit = bySubject.top(Infinity)[0];
-                        clinicalFeatures.forEach(function(feature) {
-                            if (hit && hit[feature]) {
-                                clinicalData.push({
+                    var hit = bySubject.top(Infinity)[0];
+                    clinicalFeatures.forEach(function(feature) {
+                        if (hit && hit[feature]) {
+                            if (catFeatures.indexOf(feature) !== -1) {
+                                catData.push({
                                     subject: subject,
-                                    gene: gene,
                                     feature: feature,
                                     value: hit[feature],
+                                    type: 'categoric'
                                 });
+                            } else {
+                                if (numFeatures.indexOf(feature) !== -1) {
+                                    numData.push({
+                                        subject: subject,
+                                        feature: feature,
+                                        value: hit[feature],
+                                        type: 'numeric'
+                                    });
+                                }
                             }
-                        });
-                        byGene.filterAll();
+                        }
                     });
                     bySubject.filterAll();
                 });
+
                 // DATA JOIN
                 var clinicalBox = svg.selectAll('.sr-vm-clinical-box')
-                    .data(clinicalData);
+                    .data(catData.concat(numData));
 
                 // ENTER g
                 var clinicalBoxEnter = clinicalBox.enter()
@@ -273,7 +284,7 @@ window.smartRApp.directive('variantMap', [
                 // UPDATE g
                 clinicalBox.attr('transform', function(d) {
                     return 'translate(' + (subjects.indexOf(d.subject) * BOX_SIZE) + ',' +
-                        (genes.indexOf(d.gene) * CLINICAL_BOX_HEIGHT) + ')';;
+                        (clinicalFeatures.indexOf(d.feature) * CLINICAL_BOX_HEIGHT) + ')';;
                 });
             })();
 
