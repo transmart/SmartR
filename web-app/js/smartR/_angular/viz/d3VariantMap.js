@@ -39,7 +39,7 @@ window.smartRApp.directive('variantMap', [
             var BOX_SIZE = 40;
             var CLINICAL_BOX_HEIGHT = 10;
 
-            var MAIN_PLOT_OFFSET = clinicalFeatures.length * CLINICAL_BOX_HEIGHT;
+            var MAIN_PLOT_OFFSET = clinicalFeatures.length * CLINICAL_BOX_HEIGHT + 2;
 
             var height = genes.length * BOX_SIZE + MAIN_PLOT_OFFSET;
             var width = subjects.length * BOX_SIZE;
@@ -267,6 +267,15 @@ window.smartRApp.directive('variantMap', [
                     bySubject.filterAll();
                 });
 
+                var scales = {};
+                numFeatures.forEach(function(feature) {
+                    var values = numData.filter(function(d) { return d.feature === feature; })
+                        .map(function(d) { return parseInt(d.value); });
+                    scales[feature] = d3.scale.linear()
+                        .domain(d3.extent(values))
+                        .range([0, BOX_SIZE]);
+                });
+
                 // DATA JOIN
                 var clinicalBox = svg.selectAll('.sr-vm-clinical-box')
                     .data(catData.concat(numData));
@@ -278,8 +287,21 @@ window.smartRApp.directive('variantMap', [
 
                 // ENTER rect
                 clinicalBoxEnter.append('rect')
+                    .attr('class', function(d) {
+                        if (d.type === 'categoric') {
+                            return 'sr-vm-cat-box';
+                        } else {
+                            return 'sr-vm-num-box';
+                        }
+                    })
                     .attr('height', CLINICAL_BOX_HEIGHT)
-                    .attr('width', BOX_SIZE);
+                    .attr('width', function(d) {
+                        if (d.type === 'categoric') {
+                            return BOX_SIZE;
+                        } else {
+                            return scales[d.feature](d.value);
+                        }
+                    });
 
                 // UPDATE g
                 clinicalBox.attr('transform', function(d) {

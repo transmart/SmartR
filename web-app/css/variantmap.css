@@ -29,7 +29,14 @@
     stroke-width: 2px;
 }
 
-.sr-vm-clinical-box {
-    fill: #3f3673;
+.sr-vm-clinical-box .sr-vm-cat-box {
+    fill: #2061a0;
     stroke: white;
+    shape-rendering: crispEdges;
+}
+
+.sr-vm-clinical-box .sr-vm-num-box {
+    fill: #dc9e55;
+    stroke: white;
+    shape-rendering: crispEdges;
 }
