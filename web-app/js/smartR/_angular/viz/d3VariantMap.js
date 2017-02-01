@@ -143,6 +143,18 @@ window.smartRApp.directive('variantMap', [
                                 return prev;
                             }
                         }, []));
+                        var predictions = hits.map(function(d) { return d.prediction; });
+                        var risk = (function() {
+                            if (predictions.indexOf('probably damaging') !== -1) {
+                                return 2;
+                            } else if (predictions.indexOf('possibly damaging') !== -1) {
+                                return 1;
+                            } else if (predictions.indexOf('benign') !== -1) {
+                                return 0;
+                            } else {
+                                return -1;
+                            }
+                        })();
                         var aachange = !!consequences.filter(function(consequence) { return consequence !== 'synonymous'; }).length;
                         boxData.push({
                             subject: subject,
@@ -151,6 +163,8 @@ window.smartRApp.directive('variantMap', [
                             consequences: consequences,
                             aachange: aachange,
                             variants: hits.length,
+                            predictions: predictions,
+                            risk: risk,
                         });
                         byGene.filterAll();
                     });
@@ -198,6 +212,21 @@ window.smartRApp.directive('variantMap', [
                     .style('font-size', BOX_SIZE / 2 + 'px')
                     .style('text-anchor', 'middle')
                     .text(function(d) { return d.variants ? d.variants : ''; });
+
+                // ENTER text (prediction)
+                boxEnter.append('text')
+                    .attr('x', BOX_SIZE / 4)
+                    .attr('y', BOX_SIZE / 2 - 3)
+                    .style('font-size', BOX_SIZE / 2 + 'px')
+                    .style('text-anchor', 'middle')
+                    .style('fill', function(d) {
+                        var colors = {0: '#0F0', 1: 'yellow', 2: 'red'};
+                        return colors[d.risk];
+                    })
+                    .text('!')
+                    .style('visibility', function(d) {
+                        return d.variants && d.risk !== -1 ? 'visible' : 'hidden';
+                    });
 
                 // UPDATE g
                 box.attr('transform', function(d) {

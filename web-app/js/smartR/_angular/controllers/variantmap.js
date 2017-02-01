@@ -182,8 +182,8 @@ window.smartRApp.controller('VariantMapController',
                 data: {
                     server: $scope.variantDB.server,
                     path: '/variant_all/POST/',
-                    filter_command: 'splitcommand!eq!t&getfields!eq!gene_at_position,start,reference,alleleseq,variant_genotypes&shown_individuals!eq!' + variantIDs.join(',') +
-                        '&c01,c11!ov!' + variantIDs.join(',') + '&gene!eq!' + genes.join(',') + getFilterString()
+                    filter_command: 'splitcommand!eq!t&getfields!eq!gene_at_position,start,reference,alleleseq,variant_genotypes,hgmd_rsid&shown_individuals!eq!' +
+                    variantIDs.join(',') + '&c01,c11!ov!' + variantIDs.join(',') + '&gene!eq!' + genes.join(',') + getFilterString()
                 },
                 success: function(res) { dfd.resolve(JSON.parse(res)); },
                 failure: function() { dfd.reject('An error occured when trying to communicate with VariantDB.'); }
@@ -220,6 +220,7 @@ window.smartRApp.controller('VariantMapController',
             indices['alt'] = variantData.fields.indexOf('alleleseq');
             indices['chr'] = variantData.fields.indexOf('chrom');
             indices['gene'] = variantData.fields.indexOf('gene_at_position');
+            indices['rsid'] = variantData.fields.indexOf('hgmd_rsid');
             indices['ids'] = [];
             subsetIDs.forEach(function(id) {
                 var idx = variantData.fields.indexOf(id.vID);
@@ -234,6 +235,7 @@ window.smartRApp.controller('VariantMapController',
                 var alt = d[indices['alt']];
                 var chr = d[indices['chr']];
                 var gene = d[indices['gene']];
+                var rsid = d[indices['rsid']]
                 var variants = indices['ids'].map(function(idIndex) {
                     var variant = d[idIndex];
                     var matches = variant.match(/1/g);
@@ -254,6 +256,7 @@ window.smartRApp.controller('VariantMapController',
                             alt: alt,
                             chr: chr,
                             var: variant,
+                            rsid: rsid,
                             frq: frq,
                             subset: subset,
                         });

@@ -2,24 +2,27 @@ library(reshape2)
 library(VariantAnnotation)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(BSgenome.Hsapiens.UCSC.hg19)
+library(PolyPhen.Hsapiens.dbSNP131)
+library(SIFT.Hsapiens.dbSNP132)
+
 
 txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 vcfFile <- "variants.vcf"
 
 main <- function(variants) {
     output <- list()
-    # load("/tmp/json.Rda")
-    # return(json)
+
+    load("/tmp/json.Rda")
+    return(json)
 
     save(variants, file="/tmp/variants.Rda")
     save(loaded_variables, file="/tmp/loaded_variables.Rda")
     save(fetch_params, file="/tmp/fetch_params.Rda")
 
     vcf <- variants
-    names(vcf) <- c("subject", "gene", "POS", "REF", "ALT", "CHROM", "var", "frq", "subset")
+    names(vcf) <- c("subject", "gene", "POS", "REF", "ALT", "CHROM", "var", "ID", "frq", "subset")
     vcf <- cbind(vcf, QUAL=rep(".", nrow(vcf)),
                       FILTER=rep(".", nrow(vcf)),
-                      ID=rep(".", nrow(vcf)),
                       INFO=rep(".", nrow(vcf)),
                       FORMAT=rep("GT", nrow(vcf)))
     vcf <- dcast(vcf, CHROM+POS+ID+REF+ALT+QUAL+FILTER+INFO+FORMAT~subject, fill="0|0", value.var="var")
@@ -34,14 +37,23 @@ main <- function(variants) {
     rd <- rowRanges(vcf)
     loc <- locateVariants(rd, txdb, AllVariants())
     coding <- predictCoding(vcf, txdb, seqSource=Hsapiens)
+    nms <- names(coding)
+    idx <- mcols(coding)$CONSEQUENCE != "synonymous"
+    nonsyn <- coding[idx]
+    names(nonsyn) <- nms[idx]
+    rsids <- unique(names(nonsyn)[grep("rs", names(nonsyn), fixed=TRUE)])
+    pp <- select(PolyPhen.Hsapiens.dbSNP131, keys=rsids, cols=c("TRAININGSET", "PREDICTION", "PPH2PROB"))
+    prediction <- pp[!is.na(pp$PREDICTION), ][, c("RSID", "PREDICTION")]
+    names(prediction) <- c("ID", "PREDICTION")
     locations <- aggregate(LOCATION ~ QUERYID, data=mcols(loc), FUN=function(x) toString(unique(x)))
     consequences <- aggregate(CONSEQUENCE ~ QUERYID, data=mcols(coding), FUN=function(x) toString(unique(x)))
     annotation.data <- merge(consequences, annotation.data, by="QUERYID", all.y=T)
     annotation.data <- merge(locations, annotation.data, by="QUERYID", all.y=T)
-    annotation.data <- melt(annotation.data, id.vars=c("QUERYID", "LOCATION", "CONSEQUENCE", "CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"),
+    annotation.data <- merge(prediction, annotation.data, by="ID", all.y=T)
+    annotation.data <- melt(annotation.data, id.vars=c("QUERYID", "PREDICTION", "LOCATION", "CONSEQUENCE", "CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT"),
          variable.name="subject", value.name="var")
-    annotation.data <- annotation.data[, names(annotation.data) %in% c("LOCATION", "CONSEQUENCE", "CHROM", "POS", "subject")]
-    names(annotation.data) <- c("location", "consequence", "chr", "pos", "subject")
+    annotation.data <- annotation.data[, names(annotation.data) %in% c("PREDICTION", "LOCATION", "CONSEQUENCE", "CHROM", "POS", "subject")]
+    names(annotation.data) <- c("prediction", "location", "consequence", "chr", "pos", "subject")
     if (exists("loaded_variables")) {
         hdd.idx <- grep("^highDimensional", names(loaded_variables))
         cat.idx <- grep("^categoric", names(loaded_variables))
@@ -59,7 +71,7 @@ main <- function(variants) {
         expression.data <- merge(variants, hdd.data[, -1], by=c("subject", "gene"), all.x=T)
         data <- merge(annotation.data, expression.data, by=c("subject", "chr", "pos"))
 
-        zScore.data <- data[, c(1,6,12)]
+        zScore.data <- data[, c("subject", "gene", "expr")]
         zScore.data <- zScore.data[!duplicated(zScore.data[, 1:2]), ]
         zScore.data <- dcast(zScore.data, gene~subject)
         colNames <- colnames(zScore.data)
