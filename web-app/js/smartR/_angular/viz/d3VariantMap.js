@@ -42,8 +42,8 @@ window.smartRApp.directive('variantMap', [
                 return prev.concat(Object.keys(current));
             }, [])).filter(function(d) { return d.indexOf('fullName:') !== -1; });
 
-            var BOX_HEIGHT = 30;
-            var BOX_WIDTH = 10;
+            var BOX_HEIGHT = 40;
+            var BOX_WIDTH = 16;
             var CLINICAL_BOX_HEIGHT = 10;
 
             var MAIN_PLOT_OFFSET = clinicalFeatures.length * CLINICAL_BOX_HEIGHT + 2;
@@ -122,15 +122,23 @@ window.smartRApp.directive('variantMap', [
                     .attr('class', 'sr-vm-main-box')
                     .attr('height', BOX_HEIGHT)
                     .attr('width', BOX_WIDTH);
-
                 var mainBoxStroke = parseInt(d3.select('.sr-vm-main-box').style('stroke-width'));
+
+                // ENTER rect (risk)
+                boxEnter.append('rect')
+                    .attr('class', 'sr-vm-risk-box')
+                    .attr('height', BOX_HEIGHT / 4)
+                    .attr('width', BOX_WIDTH - mainBoxStroke / 2)
+                    .attr('x', mainBoxStroke / 2)
+                    .attr('y', (BOX_HEIGHT - mainBoxStroke) * 0.45);
+
                 // ENTER rect (expr)
                 boxEnter.append('rect')
                     .attr('class', 'sr-vm-expr-box')
-                    .attr('height', BOX_HEIGHT - mainBoxStroke)
-                    .attr('width', BOX_WIDTH - mainBoxStroke)
-                    .attr('x', mainBoxStroke / 2)
-                    .attr('y', mainBoxStroke / 2);
+                    .attr('height', BOX_HEIGHT - mainBoxStroke - 2)
+                    .attr('width', BOX_WIDTH - mainBoxStroke - 2)
+                    .attr('x', mainBoxStroke / 2 + 1)
+                    .attr('y', mainBoxStroke / 2 + 1);
 
                 // UPDATE g
                 box.attr('transform', function(d) {
@@ -139,6 +147,21 @@ window.smartRApp.directive('variantMap', [
                 });
 
                 // UPDATE rect (main)
+                box.select('.sr-vm-main-box')
+                    .style('fill', function(d) {
+                        return d.aachange ? 'rgb(157,186,255)' : '#ccc';
+                    });
+
+                box.select('.sr-vm-risk-box')
+                    .style('fill', function(d) {
+                        var colors = {0: 'green', 1: 'yellow', 2: 'red'};
+                        return colors[d.risk];
+                    })
+                    .style('visibility', function(d) {
+                        return d.risk === -1 ? 'hidden' : 'visible';
+                    });
+
+                // UPDATE rect (expr)
                 box.select('.sr-vm-expr-box')
                     .style('stroke', function(d) {
                         var zScore = parseFloat(d.zscore);
@@ -252,7 +275,7 @@ window.smartRApp.directive('variantMap', [
                     return 'translate(' + (subjects.indexOf(d.subject) * BOX_WIDTH) + ',' +
                         (clinicalFeatures.indexOf(d.feature) * CLINICAL_BOX_HEIGHT) + ')';
                 });
-            });
+            })();
 
             function getValuesForDimension(dimension, ascendingOrder) {
                 var values = [];

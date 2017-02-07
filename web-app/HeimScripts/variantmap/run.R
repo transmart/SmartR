@@ -12,8 +12,8 @@ vcfFile <- "variants.vcf"
 main <- function(variants) {
     output <- list()
 
-    load("/tmp/json.Rda")
-    return(json)
+    # load("/tmp/json.Rda")
+    # return(json)
 
     save(variants, file="/tmp/variants.Rda")
     save(loaded_variables, file="/tmp/loaded_variables.Rda")

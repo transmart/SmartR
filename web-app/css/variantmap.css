@@ -26,8 +26,19 @@
     shape-rendering: crispEdges;
 }
 
+.sr-vm-risk-box {
+    stroke: none;
+    visibility: hidden;
+}
+
 .sr-vm-expr-box {
     fill: none;
-    stroke-width: 1px;
+    stroke-width: 2px;
     shape-rendering: crispEdges;
+}
+
+/* control panel */
+.sr-workflow-controls>div {
+    float: right;
+    padding: 5px 15px 5px 15px;
 }
