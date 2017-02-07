@@ -31,27 +31,6 @@ window.smartRApp.controller('VariantMapController',
 
         $scope.variantDB = {
             server: "http://10.79.2.77/accessDB",
-            func_refgene: {
-                exonic: false,
-                intronic: false,
-                upstream: false,
-                downstream: false,
-                splicing: false,
-                intergenetic: false
-            },
-            exonicfunc_refgene: {
-                frameshift_insertion: false,
-                nonframeshift_insertion: false,
-                frameshift_deletion: false,
-                nonframeshift_deletion: false,
-                frameshift_substitution: false,
-                nonframeshift_substitution: false,
-                synonymous_SNV: false,
-                nonsynonymous_SNV: false,
-            },
-            misc: {
-                globalMAF: 0.2,
-            },
         };
 
         $scope.pdmap = {
@@ -150,27 +129,6 @@ window.smartRApp.controller('VariantMapController',
             return dfd.promise();
         };
 
-        var getFilterString = function() {
-            var filters1 = [];
-            var filters2 = [];
-            var filtersString = '';
-            for (var key1 in $scope.variantDB.func_refgene) {
-                if ($scope.variantDB.func_refgene.hasOwnProperty(key1) && $scope.variantDB.func_refgene[key1]) {
-                    filters1.push(key1);
-                }
-            }
-            for (var key2 in $scope.variantDB.exonicfunc_refgene) {
-                if ($scope.variantDB.exonicfunc_refgene.hasOwnProperty(key2) && $scope.variantDB.exonicfunc_refgene[key2]) {
-                    filters1.push(key2);
-                }
-            }
-
-            filtersString += filters1.length ? '&func_refgene!ov!' + filters1.join(',') : filtersString;
-            filtersString += filters2.length ? '&exonicfunc_refgene!ov!' + filters2.join(',') : filtersString;
-            filtersString += '&field_1000g2015aug_eur,exac_all,esp6500si_ea!lt!' + $scope.variantDB.misc.globalMAF;
-            return filtersString;
-        };
-
         var getVariantDBRequestsForGenes = function(ids) {
             var variantIDs = ids.map(function(d) { return d.vID; });
             var dfd = $.Deferred();
@@ -183,7 +141,7 @@ window.smartRApp.controller('VariantMapController',
                     server: $scope.variantDB.server,
                     path: '/variant_all/POST/',
                     filter_command: 'splitcommand!eq!t&getfields!eq!gene_at_position,start,reference,alleleseq,variant_genotypes,hgmd_rsid&shown_individuals!eq!' +
-                    variantIDs.join(',') + '&c01,c11!ov!' + variantIDs.join(',') + '&gene!eq!' + genes.join(',') + getFilterString()
+                    variantIDs.join(',') + '&c01,c11!ov!' + variantIDs.join(',') + '&gene!eq!' + genes.join(',')
                 },
                 success: function(res) { dfd.resolve(JSON.parse(res)); },
                 failure: function() { dfd.reject('An error occured when trying to communicate with VariantDB.'); }

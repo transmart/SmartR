@@ -4,7 +4,8 @@
 
 window.smartRApp.directive('variantMap', [
     'smartRUtils',
-    function(smartRUtils) {
+    '$rootScope',
+    function(smartRUtils, $rootScope) {
 
         return {
             restrict: 'E',
@@ -13,19 +14,24 @@ window.smartRApp.directive('variantMap', [
                 width: '@',
                 height: '@'
             },
+            templateUrl: $rootScope.smartRPath + '/js/smartR/_angular/templates/variantMap.html',
             link: function (scope, element) {
-
+                var viz = element.children()[1];
                 scope.$watch('data', function() {
-                    $(element[0]).empty();
+                    $(viz).empty();
                     if (! $.isEmptyObject(scope.data)) {
                         smartRUtils.prepareWindowSize(scope.width, scope.height);
-                        createVariantMap(scope, element[0]);
+                        createVariantMap(scope, viz);
                     }
                 });
             }
         };
 
         function createVariantMap(scope, viz) {
+            var exprNum = smartRUtils.getElementWithoutEventListeners('sr-vm-expr-num');
+            exprNum.addEventListener('input', function() {
+                drawBoxes();
+            });
             var cf = crossfilter(scope.data.data);
             var bySubject = cf.dimension(function(d) { return d.subject; });
             var byGene = cf.dimension(function(d) { return d.gene; });
@@ -36,13 +42,14 @@ window.smartRApp.directive('variantMap', [
                 return prev.concat(Object.keys(current));
             }, [])).filter(function(d) { return d.indexOf('fullName:') !== -1; });
 
-            var BOX_SIZE = 40;
+            var BOX_HEIGHT = 30;
+            var BOX_WIDTH = 10;
             var CLINICAL_BOX_HEIGHT = 10;
 
             var MAIN_PLOT_OFFSET = clinicalFeatures.length * CLINICAL_BOX_HEIGHT + 2;
 
-            var height = genes.length * BOX_SIZE + MAIN_PLOT_OFFSET;
-            var width = subjects.length * BOX_SIZE;
+            var height = genes.length * BOX_HEIGHT + MAIN_PLOT_OFFSET;
+            var width = subjects.length * BOX_WIDTH;
 
             var margin = {
                 top: 20,
@@ -59,76 +66,7 @@ window.smartRApp.directive('variantMap', [
                 .append('g')
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-            (function drawGrid() {
-                // DATA JOIN
-                var verticalGridLine = svg.selectAll('.sr-vm-vgrid')
-                    .data(subjects);
-
-                // ENTER g
-                var verticalGridLineEnter = verticalGridLine.enter()
-                    .append('g')
-                    .attr('class', 'sr-vm-vgrid sr-vm-grid');
-
-                // ENTER line
-                verticalGridLineEnter.append('line')
-                    .attr('y2', height - MAIN_PLOT_OFFSET);
-
-                // ENTER text
-                verticalGridLineEnter.append('text')
-                    .attr('transform', 'translate(-5,' + (height - MAIN_PLOT_OFFSET + 10) + ')rotate(45)')
-                    .attr('text-anchor', 'start')
-                    .style('font-size', BOX_SIZE / 2 + 'px')
-                    .text(function(d) { return d; });
-
-                // UPDATE g
-                verticalGridLine.attr('transform', function(d) {
-                    return 'translate(' + ((subjects.indexOf(d) + 0.5) * BOX_SIZE) + ',' + MAIN_PLOT_OFFSET + ')';
-                });
-
-                // DATA JOIN
-                var horizontalGridLine = svg.selectAll('.sr-vm-hgrid')
-                    .data(genes);
-
-                // ENTER g
-                var horizontalGridLineEnter = horizontalGridLine.enter()
-                    .append('g')
-                    .attr('class', 'sr-vm-hgrid sr-vm-grid');
-
-                // ENTER line
-                horizontalGridLineEnter.append('line')
-                    .attr('x1', 0)
-                    .attr('x2', width);
-
-                // ENTER text
-                horizontalGridLineEnter.append('text')
-                    .attr('transform', 'translate(-5, ' + (BOX_SIZE / 4) + ')')
-                    .attr('text-anchor', 'end')
-                    .style('font-size', (BOX_SIZE * 3 / 4) + 'px')
-                    .text(function(d) { return d; });
-
-                // UPDATE g
-                horizontalGridLine.attr('transform', function(d) {
-                    return 'translate(0, ' + ((genes.indexOf(d) + 0.5) * BOX_SIZE + MAIN_PLOT_OFFSET) + ')';
-                });
-            })();
-
-            var redGreenScale = d3.scale.quantile()
-                .domain([0, 1])
-                .range(function() {
-                    var colorSet = [];
-                    var NUM = 100;
-                    var i = NUM;
-                    while (i--) {
-                        colorSet.push(d3.rgb((255 * i) / NUM, 0, 0));
-                    }
-                    i = NUM;
-                    while (i--) {
-                        colorSet.push(d3.rgb(0, (255 * (NUM - i)) / NUM, 0));
-                    }
-                    return colorSet.reverse();
-                }());
-
-            (function drawBoxes() {
+            function drawBoxes() {
                 var boxData = [];
                 subjects.forEach(function(subject) {
                     bySubject.filterExact(subject);
@@ -172,7 +110,7 @@ window.smartRApp.directive('variantMap', [
                 });
                 // DATA JOIN
                 var box = svg.selectAll('.sr-vm-box')
-                    .data(boxData, function(d) { return d.subject + ' ' + d.gene; });
+                    .data(boxData, function(d) { return d.subject + '-' + d.gene; });
 
                 // ENTER g
                 var boxEnter = box.enter()
@@ -182,57 +120,63 @@ window.smartRApp.directive('variantMap', [
                 // ENTER rect (main)
                 boxEnter.append('rect')
                     .attr('class', 'sr-vm-main-box')
-                    .attr('height', BOX_SIZE)
-                    .attr('width', BOX_SIZE);
+                    .attr('height', BOX_HEIGHT)
+                    .attr('width', BOX_WIDTH);
 
-                // ENTER rect (expression box)
+                var mainBoxStroke = parseInt(d3.select('.sr-vm-main-box').style('stroke-width'));
+                // ENTER rect (expr)
                 boxEnter.append('rect')
                     .attr('class', 'sr-vm-expr-box')
-                    .attr('height', BOX_SIZE / 2)
-                    .attr('width', BOX_SIZE / 2)
-                    .attr('x', BOX_SIZE / 2)
-                    .style('fill', function(d) {
-                        return redGreenScale(1 / (1 + Math.pow(Math.E, -d.zscore)));
-                    });
-
-                // ENTER line (consequence)
-                boxEnter.append('line')
-                    .attr('class', 'sr-vm-consq-line')
-                    .attr('x1', function(d) { return d.aachange ? BOX_SIZE / 4 : 0; })
-                    .attr('x2', function(d) { return d.aachange ? BOX_SIZE / 4 : BOX_SIZE / 2; })
-                    .attr('y1', function(d) { return d.aachange ? BOX_SIZE / 2 : BOX_SIZE * 3 / 4; })
-                    .attr('y2', function(d) { return d.aachange ? BOX_SIZE : BOX_SIZE * 3 / 4; })
-                    .style('stroke', function(d) { return d.aachange ? '#F00' : '#0F0'; })
-                    .style('visibility', function(d) { return d.variants ? 'visible' : 'hidden'; });
-
-                // ENTER text (variants)
-                boxEnter.append('text')
-                    .attr('x', BOX_SIZE * 3 / 4)
-                    .attr('y', BOX_SIZE - 3)
-                    .style('font-size', BOX_SIZE / 2 + 'px')
-                    .style('text-anchor', 'middle')
-                    .text(function(d) { return d.variants ? d.variants : ''; });
-
-                // ENTER text (prediction)
-                boxEnter.append('text')
-                    .attr('x', BOX_SIZE / 4)
-                    .attr('y', BOX_SIZE / 2 - 3)
-                    .style('font-size', BOX_SIZE / 2 + 'px')
-                    .style('text-anchor', 'middle')
-                    .style('fill', function(d) {
-                        var colors = {0: '#0F0', 1: 'yellow', 2: 'red'};
-                        return colors[d.risk];
-                    })
-                    .text('!')
-                    .style('visibility', function(d) {
-                        return d.variants && d.risk !== -1 ? 'visible' : 'hidden';
-                    });
+                    .attr('height', BOX_HEIGHT - mainBoxStroke)
+                    .attr('width', BOX_WIDTH - mainBoxStroke)
+                    .attr('x', mainBoxStroke / 2)
+                    .attr('y', mainBoxStroke / 2);
 
                 // UPDATE g
                 box.attr('transform', function(d) {
-                    return 'translate(' + (subjects.indexOf(d.subject) * BOX_SIZE) + ',' +
-                        (genes.indexOf(d.gene) * BOX_SIZE + MAIN_PLOT_OFFSET) + ')';
+                    return 'translate(' + (subjects.indexOf(d.subject) * BOX_WIDTH) + ',' +
+                        (genes.indexOf(d.gene) * BOX_HEIGHT + MAIN_PLOT_OFFSET) + ')';
                 });
+
+                // UPDATE rect (main)
+                box.select('.sr-vm-expr-box')
+                    .style('stroke', function(d) {
+                        var zScore = parseFloat(d.zscore);
+                        if (! zScore) {
+                            return null;
+                        } else if (Math.abs(zScore) > parseFloat(exprNum.value)) {
+                            return zScore < 0 ? 'red' : 'green';
+                        }
+                        return null;
+                    });
+            }
+            drawBoxes();
+
+            (function drawLabels() {
+                // DATA JOIN
+                var geneLabel = svg.selectAll('.sr-vm-gene-label')
+                    .data(genes);
+
+                geneLabel.enter()
+                    .append('text')
+                    .attr('y', function(d) { return genes.indexOf(d) * BOX_HEIGHT + BOX_HEIGHT / 2 + MAIN_PLOT_OFFSET; })
+                    .attr('x', - margin.left)
+                    .attr('text-anchor', 'start')
+                    .attr('font-size', BOX_HEIGHT / 2)
+                    .text(function(d) { return d; });
+
+                var subjectLabel = svg.selectAll('.sr-vm-subject-label')
+                    .data(subjects);
+
+                subjectLabel.enter()
+                    .append('text')
+                    .attr('transform', function(d) {
+                        return 'translate(' + (subjects.indexOf(d) * BOX_WIDTH + BOX_WIDTH * 0.75) + ',' +
+                            (height + 5) + ')rotate(-90)';
+                    })
+                    .attr('text-anchor', 'end')
+                    .attr('font-size', BOX_WIDTH)
+                    .text(function(d) { return d; });
             })();
 
             (function drawClinicalBoxes() {
@@ -273,7 +217,7 @@ window.smartRApp.directive('variantMap', [
                         .map(function(d) { return parseInt(d.value); });
                     scales[feature] = d3.scale.linear()
                         .domain(d3.extent(values))
-                        .range([0, BOX_SIZE]);
+                        .range([0, BOX_WIDTH]);
                 });
 
                 // DATA JOIN
@@ -297,7 +241,7 @@ window.smartRApp.directive('variantMap', [
                     .attr('height', CLINICAL_BOX_HEIGHT)
                     .attr('width', function(d) {
                         if (d.type === 'categoric') {
-                            return BOX_SIZE;
+                            return BOX_WIDTH;
                         } else {
                             return scales[d.feature](d.value);
                         }
@@ -305,10 +249,10 @@ window.smartRApp.directive('variantMap', [
 
                 // UPDATE g
                 clinicalBox.attr('transform', function(d) {
-                    return 'translate(' + (subjects.indexOf(d.subject) * BOX_SIZE) + ',' +
-                        (clinicalFeatures.indexOf(d.feature) * CLINICAL_BOX_HEIGHT) + ')';;
+                    return 'translate(' + (subjects.indexOf(d.subject) * BOX_WIDTH) + ',' +
+                        (clinicalFeatures.indexOf(d.feature) * CLINICAL_BOX_HEIGHT) + ')';
                 });
-            })();
+            });
 
             function getValuesForDimension(dimension, ascendingOrder) {
                 var values = [];

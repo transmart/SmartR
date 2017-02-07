@@ -7,26 +7,11 @@
     width: 300px;
 }
 
-.sr-vm-grid line {
-    stroke: #BBB;
-    stroke-width: 1px;
-    shape-rendering: crispEdges;
-}
-
 .sr-vm-box .sr-vm-main-box {
-    fill: none;
-    stroke: black;
-    stroke-width: 1px;
+    fill: #cccccc;
+    stroke: white;
+    stroke-width: 4px;
     shape-rendering: crispEdges;
-}
-
-.sr-vm-box .sr-vm-expr-box {
-    stroke: none;
-    fill: none;
-}
-
-.sr-vm-consq-line {
-    stroke-width: 2px;
 }
 
 .sr-vm-clinical-box .sr-vm-cat-box {
@@ -38,5 +23,11 @@
 .sr-vm-clinical-box .sr-vm-num-box {
     fill: #dc9e55;
     stroke: white;
+    shape-rendering: crispEdges;
+}
+
+.sr-vm-expr-box {
+    fill: none;
+    stroke-width: 1px;
     shape-rendering: crispEdges;
 }
