@@ -42,7 +42,7 @@ main <- function(max_rows = 100, sorting = "nodes", ranking = "coef", selections
         sorted.hd.df <- hd.df[, 1:2]
         colName.wo.subject <- sub("^.+?_", "", colNames)
         for (name in unique(colName.wo.subject)) {
-            indices <- grep(name, colNames)
+            indices <- grep(name, colNames, fixed=TRUE)
             ordering <- order(subjects[indices])
             sorted.hd.df <- cbind(sorted.hd.df, hd.df[, -c(1,2)][, indices][, ordering])
         }
