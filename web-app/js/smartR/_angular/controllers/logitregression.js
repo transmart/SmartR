@@ -1,14 +1,14 @@
-//# sourceURL=logit.js
+//# sourceURL=logitregression.js
 
 'use strict';
 
-window.smartRApp.controller('LogitController', [
+window.smartRApp.controller('LogitRegressionController', [
     '$scope',
     'smartRUtils',
     'commonWorkflowService',
     function($scope, smartRUtils, commonWorkflowService) {
 
-        commonWorkflowService.initializeWorkflow('logit', $scope);
+        commonWorkflowService.initializeWorkflow('logitregression', $scope);
 
         $scope.fetch = {
             disabled: true,

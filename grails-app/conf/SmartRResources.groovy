@@ -57,8 +57,8 @@ modules = {
         // linegraph
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'linegraph.js']
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/viz', file: 'd3Linegraph.js']
-        // logit
-        resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'logit.js']
-        resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/viz', file: 'd3Logit.js']
+        // logistic regression
+        resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'logitregression.js']
+        resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/viz', file: 'd3LogitRegression.js']
     }
 }
