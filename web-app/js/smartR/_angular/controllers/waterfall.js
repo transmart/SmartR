@@ -44,7 +44,7 @@ window.smartRApp.controller('WaterfallController', [
             // clear old results
             if (fetchRunning) {
                 $scope.runAnalysis.scriptResults = {};
-                $scope.common.subsets = smartRUtils.countCohorts();
+                //$scope.common.subsets = smartRUtils.countCohorts();
             }
 
             // disable tabs when certain criteria are met
