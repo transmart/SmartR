@@ -2,7 +2,7 @@
 
 'use strict';
 
-window.smartRApp = angular.module('smartRApp', ['ngRoute', 'door3.css'])
+window.smartRApp = angular.module('smartRApp', ['ngRoute', 'door3.css', 'ipaApi'])
     .config(['$httpProvider', function($httpProvider) {
         //initialize get if not there
         if (!$httpProvider.defaults.headers.get) {

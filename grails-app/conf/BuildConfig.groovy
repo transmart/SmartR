@@ -48,17 +48,20 @@ grails.project.dependency.resolution = {
         dm.configureRepositories delegate
     }
     dependencies {
+        compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
         // compile 'org.apache.ant:ant:1.9.6'
         compile 'net.sf.opencsv:opencsv:2.3'
         compile 'org.rosuda:Rserve:1.7.3'
         compile 'org.mapdb:mapdb:0.9.10'
+        compile 'org.apache.commons:commons-lang3:3.4'
 
         /* serializable ImmutableMap only on guava 16 */
         compile group: 'com.google.guava', name: 'guava', version: '16.0-dev-20140115-68c8348'
-        compile 'org.transmartproject:transmart-core-api:1.2.2-SNAPSHOT'
+        compile 'org.transmartproject:transmart-core-api:16.2'
         //test 'com.jayway.restassured:rest-assured:2.4.1'
 
         runtime 'org.javassist:javassist:3.16.1-GA'
+        runtime 'com.ittm_solutions.ipacore:IpaApi:1.0.0'
 
         test('org.gmock:gmock:0.9.0-r435-hyve2') {
             transitive = false /* don't bring groovy-all */
@@ -83,10 +86,10 @@ grails.project.dependency.resolution = {
         //runtime ':hibernate:3.6.10.16'
 
         if (!dm) {
-            runtime ':transmart-core:1.2.2-SNAPSHOT'
+            runtime ':transmart-core:16.2'
 
-            test ':transmart-core:1.2.2-SNAPSHOT'
-            test ':transmart-core-db-tests:1.2.2-SNAPSHOT'
+            //test ':transmart-core:16.2'
+            //test ':transmart-core-db-tests:16.2'
         } else {
             dm.internalDependencies delegate
         }

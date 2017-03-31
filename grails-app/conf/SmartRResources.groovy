@@ -12,6 +12,10 @@ modules = {
         resource url: [plugin: 'smart-r', dir: 'js/resource', file: 'angular.js']
         resource url: [plugin: 'smart-r', dir: 'js/resource', file: 'angular-route.js']
         resource url: [plugin: 'smart-r', dir: 'js/resource', file: 'angular-css.js']
+        // IPA connector
+        resource url: [plugin: 'smart-r', dir: 'js/resource', file: 'sha256.js']
+        resource url: [plugin: 'smart-r', dir: 'js/resource', file: 'ng-table.js']
+        resource url: [plugin: 'smart-r', dir: 'css', file: 'ng-table.css']
     }
 
     smartR_angular_components {
@@ -34,6 +38,7 @@ modules = {
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/directives', file: 'cohortSummaryInfo.js']
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/directives', file: 'workflowWarnings.js']
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/directives', file: 'workflowControls.js']
+        resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/directives', file: 'ipaApi.js']
         // services
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/services', file: 'rServeService.js']
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/services', file: 'smartRUtils.js']
@@ -57,5 +62,9 @@ modules = {
         // linegraph
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'linegraph.js']
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/viz', file: 'd3Linegraph.js']
+        // patientmapper
+        resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'patientmapper.js']
+        // IPA connector
+        resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'ipaconnector.js']
     }
 }

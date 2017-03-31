@@ -35,12 +35,19 @@ main <- function(max_rows = 100, sorting = "nodes", ranking = "coef", selections
     hd.df = data.list$HD
     ld.list = data.list$LD    
     
+    colNames <- colnames(hd.df[, -c(1,2)])
+    subjects <- as.numeric(sub("_.+", "", colNames))
+    subsets <- as.numeric(substring(colNames, first=nchar(colNames), last=nchar(colNames)))
     if (sorting == "nodes") {
-
+        sorted.hd.df <- hd.df[, 1:2]
+        colName.wo.subject <- sub("^.+?_", "", colNames)
+        for (name in unique(colName.wo.subject)) {
+            indices <- grep(name, colNames, fixed=TRUE)
+            ordering <- order(subjects[indices])
+            sorted.hd.df <- cbind(sorted.hd.df, hd.df[, -c(1,2)][, indices][, ordering])
+        }
+        hd.df <- sorted.hd.df
     } else {
-        colNames <- colnames(hd.df[, -c(1,2)])
-        subjects <- as.numeric(sub("_.+", "", colNames))
-        subsets <- as.numeric(substring(colNames, first=nchar(colNames), last=nchar(colNames)))
         ordering <- order(as.numeric(paste(subjects, subsets, sep="")))
         hd.df <- cbind(hd.df[, c(1,2)], hd.df[, -c(1,2)][, ordering])
     }
@@ -92,7 +99,7 @@ main <- function(max_rows = 100, sorting = "nodes", ranking = "coef", selections
     rowNames        <- hd.df[, 1]
     
     ## colNames should reflect here only the sample names (e.g. "67_Breast_s1")
-    colNames = colnames(hd.df)[grep("^\\d+_.+_s\\d$", colnames(hd.df), perl = TRUE)]
+    colNames = colnames(hd.df)[grep("^.+_.+_s\\d$", colnames(hd.df), perl = TRUE)]
 
     significanceValues <- hd.df["SIGNIFICANCE"][,1]
     

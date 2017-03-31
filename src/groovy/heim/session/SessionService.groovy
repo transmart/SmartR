@@ -84,7 +84,7 @@ class SessionService implements DisposableBean {
         dir.listFiles({ File f ->
             f.isDirectory() && !f.name.startsWith('_') &&
                     (Environment.current == Environment.DEVELOPMENT || !(f.name in HIDDEN_WORKFLOWS))
-        } as FileFilter)*.name
+        } as FileFilter)*.name.sort()
     }
 
     UUID createSession(User user, String workflowType) {
