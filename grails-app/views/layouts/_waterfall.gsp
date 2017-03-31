@@ -36,7 +36,8 @@
                         <option value="&lt;=">&lt;=</option>
                     </select>
                     <input id="runAnalysis.params.txtLowRange">
-
+                    <br>
+                    <br>
                     <label for="runAnalysis.params.selHighRange">High Range </label>
                     <select id="runAnalysis.params.selHighRange">
                         <option value="&gt;" selected="selected">&gt;</option>
