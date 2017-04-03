@@ -2,9 +2,6 @@ library(jsonlite)
 library(reshape2)
 
 main <- function() {
-#    save(loaded_variables, file="/Users/sascha/loaded_variables.Rda")
-#    save(fetch_params, file="/Users/sascha/fetch_params.Rda")
-
     df <- buildCrossfilterCompatibleDf(loaded_variables, fetch_params)
     checkTimeNameSanity(df)
 
@@ -46,7 +43,7 @@ getTypes <- function(loaded_variables) {
 
 # returns integer of extracted time if possible, NULL otherwise
 extractTime <- function(string) {
-    match <- regmatches(string, regexpr("-? ?\\d+", string)) 
+    match <- regmatches(string, regexpr("((?>- )|-)?\\d+(?>\\.\\d+)?", string, perl=TRUE))
     timeInteger <- as.numeric(match[1])
     if (!is.na(timeInteger) && timeInteger%%1 == 0) {
         return(timeInteger)
