@@ -4,8 +4,6 @@ library(reshape2)
 
 main <- function(excludedPatientIDs = integer(), hddTransformation="identity", lddTransformation="identity") {
     output <- list()
-    save(loaded_variables, file="/tmp/loaded_variables.Rda")
-    save(fetch_params, file="/tmp/fetch_params.Rda")
 
     hddTransformation <- eval(parse(text=hddTransformation))
     lddTransformation <- eval(parse(text=lddTransformation))
