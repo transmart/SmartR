@@ -47,7 +47,7 @@ window.smartRApp.directive('boxplot', [
             byBioMarker.filterAll();
         });
 
-        var title = 'Boxplots (' + scope.data.transformation + ')';
+        var title = 'Boxplots';
         title += scope.data.pValue ? ' ANOVA pValue = ' + scope.data.pValue : '';
         var layout = {
             title: title,
