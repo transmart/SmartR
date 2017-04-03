@@ -31,7 +31,8 @@ window.smartRApp.controller('BoxplotController', [
             disabled: true,
             scriptResults: {},
             params: {
-                transformation: 'raw'
+                lddTransformation: 'identity',
+                hddTransformation: 'identity'
             }
         };
 

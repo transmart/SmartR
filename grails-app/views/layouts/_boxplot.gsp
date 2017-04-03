@@ -46,23 +46,84 @@
 
         <workflow-tab tab-name="Run Analysis" disabled="runAnalysis.disabled">
            <div class="heim-input-field sr-input-area">
-                <h2>Data transformation:</h2>
+                <h2>Data transformation (high-dimensional):</h2>
                 <fieldset class="heim-radiogroup">
                     <label>
                         <input type="radio"
-                               ng-model="runAnalysis.params.transformation"
-                               value="raw" checked> Raw Values
+                               ng-model="runAnalysis.params.hddTransformation"
+                               value="identity" checked> No transformation
                     </label>
                     <label>
                         <input type="radio"
-                               ng-model="runAnalysis.params.transformation"
-                               value="log2"> Log2
+                               ng-model="runAnalysis.params.hddTransformation"
+                               value="log"> ln
                     </label>
                     <label>
                         <input type="radio"
-                               ng-model="runAnalysis.params.transformation"
-                               value="log10"> Log10
+                               ng-model="runAnalysis.params.hddTransformation"
+                               value="log2"> lb
+                    </label>
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.hddTransformation"
+                               value="log10"> lg
 
+                    </label>
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.hddTransformation"
+                               value="exp"> e^x
+                    </label>
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.hddTransformation"
+                               value="function(x) 2^x"> 2^x
+                    </label>
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.hddTransformation"
+                               value="function(x) 10^x"> 10^x
+                    </label>
+                </fieldset>
+            </div>
+            <div class="heim-input-field sr-input-area">
+                <h2>Data transformation (low-dimensional):</h2>
+                <fieldset class="heim-radiogroup">
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.lddTransformation"
+                               value="identity" checked> No transformation
+                    </label>
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.lddTransformation"
+                               value="log"> ln
+                    </label>
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.lddTransformation"
+                               value="log2"> lb
+                    </label>
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.lddTransformation"
+                               value="log10"> lg
+
+                    </label>
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.lddTransformation"
+                               value="exp"> e^x
+                    </label>
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.lddTransformation"
+                               value="function(x) 2^x"> 2^x
+                    </label>
+                    <label>
+                        <input type="radio"
+                               ng-model="runAnalysis.params.lddTransformation"
+                               value="function(x) 10^x"> 10^x
                     </label>
                 </fieldset>
             </div>

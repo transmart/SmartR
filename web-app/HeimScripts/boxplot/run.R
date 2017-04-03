@@ -2,18 +2,14 @@ library(jsonlite)
 library(plyr)
 library(reshape2)
 
-main <- function(excludedPatientIDs = integer(), transformation="raw") {
+main <- function(excludedPatientIDs = integer(), hddTransformation="identity", lddTransformation="identity") {
     output <- list()
-    output$transformation <- transformation
 
-    df <- buildCrossfilterCompatibleDf(loaded_variables, fetch_params)
-    if (transformation == "log2") {
-        df$value <- log2(df$value)
-    } else if (transformation == "log10") {
-        df$value <- log10(df$value)
-    }
+    hddTransformation <- eval(parse(text=hddTransformation))
+    lddTransformation <- eval(parse(text=lddTransformation))
 
-    df <- df[!is.infinite(df$value), ]
+    df <- buildCrossfilterCompatibleDf(loaded_variables, fetch_params, hddTransformation, lddTransformation)
+
     if (length(unique(df$bioMarker)) >= 2) {
         ano <- anova(lm(value ~ bioMarker, data=df))
         p <- ano[1,5]
@@ -26,7 +22,7 @@ main <- function(excludedPatientIDs = integer(), transformation="raw") {
 }
 
 # returns df that is compatible with crossfilter.js
-buildCrossfilterCompatibleDf <- function(loaded_variables, fetch_params) {
+buildCrossfilterCompatibleDf <- function(loaded_variables, fetch_params, hddTransformation, lddTransformation) {
     # gather information
     subsets <- getSubsets(loaded_variables)
     names <- getNames(loaded_variables, fetch_params)
@@ -64,7 +60,13 @@ buildCrossfilterCompatibleDf <- function(loaded_variables, fetch_params) {
                                                 stringsAsFactors=FALSE)
                 # no value -> no interest
                 variable.label.df <- variable.label.df[variable.label.df$value != "" & !is.na(variable.label.df$value), ]
+
+                # apply transformation
+                variable.label.df$value <- hddTransformation(variable.label.df$value)
+                variable.label.df <- variable.label.df[!is.infinite(variable.label.df$value), ]
+
                 if (nrow(variable.label.df) == 0) next
+
                 df <- rbind(df, variable.label.df)
             }
         } else  if (types[i] == "numeric"){
@@ -81,7 +83,13 @@ buildCrossfilterCompatibleDf <- function(loaded_variables, fetch_params) {
                                  stringsAsFactors=FALSE)
             # no value -> no interest
             variable.df <- variable.df[variable.df$value != "" & !is.na(variable.df$value), ]
+
+            # apply transformation
+            variable.df$value <- lddTransformation(variable.df$value)
+            variable.df <- variable.df[!is.infinite(variable.df$value), ]
+
             if (nrow(variable.df) == 0) next
+
             df <- rbind(df, variable.df)
         }
     }
