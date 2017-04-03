@@ -1,16 +1,14 @@
-
-
-.point {
+.sr-point {
     fill: black;
     stroke: black;
 }
 
-.point.selected, .point.hover{						
+.selected, .hover{						
     fill: white;
     stroke: black;
 }
 
-.logit-curve {
+.sr-logit-curve {
     stroke: blue;
     stroke-width: 3px;
     fill: none;
@@ -20,26 +18,26 @@
 .axis line {
     fill: none;
     stroke: black;
-    shape-rendering: crispEdges;
 }
 
-.reference-line {
+.sr-reference-line {
     stroke: black;
     stroke-width: 1;
     stroke-dasharray: 5, 5;
     stroke-opacity: 0.75;
 }
 
-.grid-line {
+.sr-grid-line {
     stroke: black;
     stroke-width: 1;
     fill: block;
     opacity: 0.25
 }
 
-.distr-hist {
+.sr-distr-hist {
     fill: blue;
-    opacity: .1;
+    stroke: black;
+    opacity: 0.125; 
     shape-rendering: crispEdges;
 }
 
@@ -50,6 +48,5 @@
 }
 
 .tick line {
-    shape-rendering: crispEdges;
     opacity: 0.2;
 }

@@ -1,7 +1,7 @@
 
-<script type="text/ng-template" id="logit">
+<script type="text/ng-template" id="logitregression">
 
-    <div ng-controller="LogitController">
+    <div ng-controller="LogitRegressionController">
 
         <tab-container>
 
@@ -73,10 +73,10 @@
                             arguments-to-use="runAnalysis.params"
                             running="runAnalysis.running">
                 </run-button>
-                <capture-plot-button filename="logit.svg" target="logit-plot"></capture-plot-button>
+                <capture-plot-button filename="logitregression.svg" target="logitregression-plot"></capture-plot-button>
                 <br/>
                 <br/>
-                <logit-plot data="runAnalysis.scriptResults" width="1500" height="1500"></logit-plot>
+                <logit-regression-plot data="runAnalysis.scriptResults" width="1500" height="1500"></logitregression-plot>
             </workflow-tab>
 
         </tab-container>

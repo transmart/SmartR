@@ -1,8 +1,8 @@
-//# sourceURL=d3Logit.js
+//# sourceURL=d3LogitRegression.js
 
 "use strict";
 
-window.smartRApp.directive("logitPlot", [
+window.smartRApp.directive("logitRegressionPlot", [
     "smartRUtils",
     "rServeService",
     function(smartRUtils, rServeService) {
@@ -47,7 +47,8 @@ window.smartRApp.directive("logitPlot", [
 			nodes,
 			fitted,
 			residuals,
-			deviance;
+			deviance,
+			pvalue;
 
 		var xArrLabel = scope.data.xArrLabel[0];
 		var yArrLabel = scope.data.yArrLabel[0];
@@ -79,9 +80,9 @@ window.smartRApp.directive("logitPlot", [
 		}
 
 		function cleanPlotted(){
-			d3.select(root).selectAll(".logit-curve").remove();
-			d3.select(root).selectAll(".reference-line").remove();
-			d3.select(root).selectAll(".distr-hist").remove();
+			d3.select(root).selectAll(".sr-logit-curve").remove();
+			d3.select(root).selectAll(".sr-reference-line").remove();
+			d3.select(root).selectAll(".sr-distr-hist").remove();
 			d3.select(root).selectAll(".legend").remove();
 		}
 
@@ -90,7 +91,8 @@ window.smartRApp.directive("logitPlot", [
 			nodes = data.data;
 			fitted = data.fitted;
 			residuals = data.residuals;
-			deviance = data.deviance;			
+			deviance = data.deviance;
+			pvalue = data.pvalue[1]["Pr(>Chi)"];
 		}
 
 		function updatePlotData(){
@@ -130,7 +132,7 @@ window.smartRApp.directive("logitPlot", [
 				.data(nodes)
 				.enter()
 				.append("line")
-					.attr("class", "reference-line")
+					.attr("class", "sr-reference-line")
 					.attr("id", function(d){ 
 						var id = "refline-" + Math.round(d.plotx) + "-" + Math.round(d.ploty);
 						return id; 
@@ -155,7 +157,7 @@ window.smartRApp.directive("logitPlot", [
 				var y0 = extent[0][1];
 				var y1 = extent[1][1];
 
-				var all = d3.selectAll(".point");
+				var all = d3.selectAll(".sr-point");
 
 				var selected = all.filter(function(d){
 					return (d.plotx >= x0) && (d.plotx <= x1) && (d.ploty >= y0) && (d.ploty <= y1);
@@ -165,13 +167,8 @@ window.smartRApp.directive("logitPlot", [
 					return (d.plotx < x0) || (d.plotx > x1) || (d.ploty < y0) || (d.ploty > y1);
 				});
 
-				selected
-					.classed("selected", true)
-					.attr("r", "7");
-
-				unselected
-					.classed("selected", false)
-					.attr("r", "5");
+				selected.classed("selected", true);
+				unselected.classed("selected", false);
 
 				var patientIDs = selected.data().map(function(d){ return d.patientID; });
 				updateRegression(patientIDs, data, false);
@@ -202,7 +199,7 @@ window.smartRApp.directive("logitPlot", [
 
 			svg.append("g")
 				.append("path")
-				.attr("class", "logit-curve")
+				.attr("class", "sr-logit-curve")
 				.attr("d", lineGen(dataSorted));
 		}
 
@@ -219,6 +216,7 @@ window.smartRApp.directive("logitPlot", [
 				"X Transformation: " + data.transformationx[0],
 				"Y Transformation: " + data.transformationy[0],
 				"Deviance: " + deviance,
+				"p-Value: " + pvalue,
 				"Residual Range: " + residualrange
 			];
 
@@ -247,7 +245,7 @@ window.smartRApp.directive("logitPlot", [
 
 		function updateRegression(patientIDs, data, init){
 			if (! init) {
-				patientIDs = patientIDs.length !== 0 ? patientIDs : d3.selectAll("point").data().map(function(d) {
+				patientIDs = patientIDs.length !== 0 ? patientIDs : d3.selectAll("sr-point").data().map(function(d) {
 					return d.patientID;
 				});
 			}
@@ -289,7 +287,7 @@ window.smartRApp.directive("logitPlot", [
 				.data(data)
 				.enter()
 				.append("circle")
-					.attr("class", "point")
+					.attr("class", "sr-point")
 					.attr("cx", function(d){ return d.plotx; })
 					.attr("cy", function(d){ return d.ploty; })
 					.attr("r", "5")
@@ -299,7 +297,7 @@ window.smartRApp.directive("logitPlot", [
 							.attr("r", "7");
 						
 						var id = "#refline-" + Math.round(d.plotx) + "-" + Math.round(d.ploty);
-						d3.select(id) 
+						d3.select(id)
 							.style("display", "block");
 
 						tip.direction( d.residual < 0? "s" : "n" ) 
@@ -346,7 +344,7 @@ window.smartRApp.directive("logitPlot", [
 				.data(countx)
 				.enter()
 				.append("rect")
-					.attr("class", "distr-hist")
+					.attr("class", "sr-distr-hist")
 					.attr("x", function(d){ return (d.value - histSize/2); })
 					.attr("y", function(){ return height+origin.y; })
 					.attr("width", histSize)
@@ -357,34 +355,34 @@ window.smartRApp.directive("logitPlot", [
 				.data(county)
 				.enter()
 				.append("rect")
-					.attr("class", "distr-hist")
+					.attr("class", "sr-distr-hist")
 					.attr("x", function(d){ return margin.left-(d.count/maxcountY)*margin.left; })
 					.attr("y", function(d){ return (d.value - histSize/2); })
 					.attr("width", function(d){ return (d.count/maxcountY)*margin.left; })
 					.attr("height", histSize);
 		}
 
-		function setupGrid(){		
+		function setupGrid(){
 			var height = dimensions.height;
 			var width = dimensions.width;
 			var origin = dimensions.origin;
 			var margin = dimensions.margin;
 
 			var spacingx = width / ticks;
-			var spacingy = height / ticks; 
+			var spacingy = height / ticks;
 
 			var grid = [];
 			for(var i=0; i<=ticks; ++i){
 				grid.push(i);
 			}
 
-			// x axis grid	
+			// x axis grid
 			svg.append("g")
 				.selectAll("line")
 				.data(grid)
 				.enter()
 				.append("line")
-				.attr("class", "grid-line")
+				.attr("class", "sr-grid-line")
 				.attr("x1", origin.x)
 				.attr("x2", origin.x + width)
 				.attr("y1", function(d, i){ return Math.round((i*spacingy) + margin.top); })
@@ -396,7 +394,7 @@ window.smartRApp.directive("logitPlot", [
 				.data(grid)
 				.enter()
 				.append("line")
-				.attr("class", "grid-line")
+				.attr("class", "sr-grid-line")
 				.attr("x1", function(d, i){ return Math.round((i*spacingx) + origin.x); })
 				.attr("x2", function(d, i){ return Math.round((i*spacingx) + origin.x); })
 				.attr("y1", margin.top)
@@ -413,9 +411,9 @@ window.smartRApp.directive("logitPlot", [
 
 			var xScale = d3.scale.linear()
 					.domain(axisdomains.domY)
-					.range([0, width]); 
+					.range([0, width]);
 
-			var yScale; 
+			var yScale;
 			yScale = d3.scale.linear()
 				.domain(axisdomains.domX)
 				.range([0, height]);
@@ -450,7 +448,7 @@ window.smartRApp.directive("logitPlot", [
                 .attr("class", "label-y")
                 .text(smartRUtils.shortenConcept(yArrLabel));
 			var boundsy = labely.node().getBoundingClientRect();
-			labely.attr("transform", "translate("  + (width + origin.x + plotSpace) + "," + ((height / 2) + margin.top - (boundsy.width/2)) + ") rotate(90)");
+			labely.attr("transform", "translate("  + (width + origin.x + plotSpace) + "," + ((height / 2) + margin.top - (boundsy.width/2)) + ") rotate(-90)");
 		}
 
 		// transform data to plot coordinates

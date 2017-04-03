@@ -82,6 +82,7 @@ main <- function(transformationx = "raw", transformationy = "raw", selectedPatie
 
     # correlation of input and fitted points
     correlation = cor(glm.out$fitted.values, df$y)
+    pvalue = anova(glm.out, test="Chisq")
 
     fitted = data.frame(x=df$x, y=glm.out$fitted.values)
 
@@ -96,7 +97,8 @@ main <- function(transformationx = "raw", transformationy = "raw", selectedPatie
         transformationx = transformationx,
         transformationy = transformationy,
         selected = selectedPatientIDs,
-        forceNormalize = forceNormalize
+        forceNormalize = forceNormalize,
+        pvalue = pvalue
     ) 
     toJSON(output)
 }
