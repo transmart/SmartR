@@ -14,6 +14,6 @@ main <- function(lowRangeOperator = "&lt;", lowRangeValue = "", highRangeOperato
     #Write the final data file.
     # write.matrix(finalData,"outputfile.txt",sep = "\t")
     # Using write.table; write.matrix was leaving trailing white-space in the file - see JIRA issue TRANSREL-24.
-    write.table(num_data,"~/num_data.dat", sep = "\t", quote = FALSE, row.names = FALSE)
+    write.table(num_data,"/home/transmart/num_data.dat", sep = "\t", quote = FALSE, row.names = FALSE)
 }
 
