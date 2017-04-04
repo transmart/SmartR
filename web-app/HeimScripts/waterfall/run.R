@@ -2,6 +2,11 @@
 main <- function(selLowRange = "&lt;", txtLowRange = "", selHighRange = "&lt;", txtHighRange = "") {
 
     print("BUILDING WATERFALL DATA")
+    if (selLowRange == "&lt;" & txtLowRange == "" & selHighRange == "&lt;" & txtHighRange == "")
+    {
+        print("Dummy print")
+    }
+
     num_data <- loaded_variables$numData_n0_s1
 
     #Read the input data.
