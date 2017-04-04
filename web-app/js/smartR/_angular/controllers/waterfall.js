@@ -27,10 +27,10 @@ window.smartRApp.controller('WaterfallController', [
             disabled: true,
             running: false,
             params: {
-                selLowRange: '&lt;',
-                txtLowRange: 0,
-                selHighRange: '&gt;',
-                txtHighRange: 0,
+                lowRangeOperator: '&lt;',
+                lowRangeValue: '',
+                highRangeOperator: '&gt;',
+                highRangeValue: 0,
             },
             scriptResults: {}
         };

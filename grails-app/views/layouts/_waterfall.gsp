@@ -30,20 +30,21 @@
             <div class="heim-input-field sr-input-area">
                 <h2>Display Setting:</h2>
                 <fieldset class="waterfall-params">
-                    <label for="runAnalysis.params.selLowRange">Low Range </label>
-                    <select id="runAnalysis.params.selLowRange">
+                    <br>
+                    <label for="runAnalysis.params.lowRangeOperator">Low Range </label>
+                    <select id="runAnalysis.params.lowRangeOperator">
                         <option value="&lt;" selected="selected">&lt;</option>
                         <option value="&lt;=">&lt;=</option>
                     </select>
-                    <input id="runAnalysis.params.txtLowRange">
+                    <input id="runAnalysis.params.lowRangeValue">
                     <br>
-                    <br>
-                    <label for="runAnalysis.params.selHighRange">High Range </label>
-                    <select id="runAnalysis.params.selHighRange">
+                    <label for="runAnalysis.params.highRangeOperator">High Range </label>
+                    <select id="runAnalysis.params.highRangeOperator">
                         <option value="&gt;" selected="selected">&gt;</option>
                         <option value="&gt;=">&gt;=</option>
                     </select>
-                    <input id="runAnalysis.params.txtHighRange">
+                    <input id="runAnalysis.params.highRangeValue">
+                    <br>
                 </fieldset>
             </div>
             <hr class="sr-divider">
@@ -53,6 +54,8 @@
                         arguments-to-use="runAnalysis.params"
                         running="runAnalysis.running">
             </run-button>
+%{--            <capture-plot-button filename="waterfall.svg" target="waterfall-plot"></capture-plot-button>
+            <waterfall-plot data="runAnalysis.scriptResults" width="1500" height="1500"></waterfall-plot>--}%
         </workflow-tab>
 
     </tab-container>
