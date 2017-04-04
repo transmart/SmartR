@@ -1,11 +1,7 @@
 
-main <- function(selLowRange = "&lt;", txtLowRange = "", selHighRange = "&lt;", txtHighRange = "") {
+main <- function(lowRangeOperator = "&lt;", lowRangeValue = "", highRangeOperator = "&lt;", highRangeValue = "") {
 
     print("BUILDING WATERFALL DATA")
-    if (selLowRange == "&lt;" & txtLowRange == "" & selHighRange == "&lt;" & txtHighRange == "")
-    {
-        print("Dummy print")
-    }
 
     num_data <- loaded_variables$numData_n0_s1
 

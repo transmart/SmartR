@@ -44,7 +44,7 @@
                         <option value="&gt;=">&gt;=</option>
                     </select>
                     <input id="runAnalysis.params.highRangeValue">
-                    <br>
+                    <br><br>
                 </fieldset>
             </div>
             <hr class="sr-divider">
