@@ -27,9 +27,9 @@ window.smartRApp.controller('WaterfallController', [
             disabled: true,
             running: false,
             params: {
-                lowRangeOperator: '&lt;',
+                lowRangeOperator: '<',
                 lowRangeValue: '',
-                highRangeOperator: '&gt;',
+                highRangeOperator: '>',
                 highRangeValue: '',
             },
             scriptResults: {}
