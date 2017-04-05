@@ -1,16 +1,10 @@
 
 main <- function(lowRangeOperator = "&lt;", lowRangeValue = "", highRangeOperator = "&lt;", highRangeValue = "") {
 
-    print("BUILDING WATERFALL DATA")
-
     save(loaded_variables, file="/tmp/data/loaded_variables.Rda")
+    save(fetch_params$ontologyTerms, file="/tmp/data/fetch_params.Rda")
 
-    #num_data <- loaded_variables$numData_n0_s1
-
-    #Read the input data.
-    #if (nrow(num_data) == 0) {
     stop(paste("R Script: lowRangeOperator = '", lowRangeOperator, "'  lowRangeValue = '", lowRangeValue, "'  highRangeOperator = '", highRangeOperator, "'  highRangeValue = '", highRangeValue, "'"), sep="")
-    stop()
-#}
+
 }
 
