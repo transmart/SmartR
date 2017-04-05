@@ -9,7 +9,8 @@ main <- function(lowRangeOperator = "&lt;", lowRangeValue = "", highRangeOperato
 
     #Read the input data.
     #if (nrow(num_data) == 0) {
-    stop("R Script Stops here...")
+    stop(paste("R Script: lowRangeOperator = ", lowRangeOperator, "  lowRangeValue = ", lowRangeValue, "  highRangeOperator = ", highRangeOperator, "  highRangeValue = ", highRangeValue), sep="")
+    stop()
 #}
 }
 
