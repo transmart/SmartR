@@ -3,17 +3,13 @@ main <- function(lowRangeOperator = "&lt;", lowRangeValue = "", highRangeOperato
 
     print("BUILDING WATERFALL DATA")
 
-    num_data <- loaded_variables$numData_n0_s1
+    save(loaded_variables, file="~/loaded_variables.Rda")
+
+    #num_data <- loaded_variables$numData_n0_s1
 
     #Read the input data.
-    if (nrow(num_data) == 0) {
-        stop(paste("Variable '", fetch_params$ontologyTerms$num_data_n0$name, "' has no patients for subset 1"), sep="")
-    }
-
-    require(MASS)
-    #Write the final data file.
-    # write.matrix(finalData,"outputfile.txt",sep = "\t")
-    # Using write.table; write.matrix was leaving trailing white-space in the file - see JIRA issue TRANSREL-24.
-    write.table(num_data,"/home/transmart/num_data.dat", append = FALSE, sep = "\t", quote = FALSE, row.names = FALSE)
+    #if (nrow(num_data) == 0) {
+#    stop(paste("Variable '", fetch_params$ontologyTerms$num_data_n0$name, "' has no patients for subset 1"), sep="")
+#}
 }
 
