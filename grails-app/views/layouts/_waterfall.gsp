@@ -31,19 +31,19 @@
                 <h2>Display Setting:</h2>
                 <fieldset class="waterfall-params">
                     <br>
-                    <label for="runAnalysis.params.lowRangeOperator">Low Range </label>
-                    <select id="runAnalysis.params.lowRangeOperator">
+                    <label for="gsp-waterfall-low-check">Low Range </label>
+                    <select id="gsp-waterfall-low-check" ng-model="runAnalysis.params.lowRangeOperator">
                         <option value="&lt;" selected="selected">&lt;</option>
                         <option value="&lt;=">&lt;=</option>
                     </select>
-                    <input id="runAnalysis.params.lowRangeValue">
+                    <input id="gsp-waterfall-low-txt-identifier" ng-model="runAnalysis.params.lowRangeValue">
                     <br>
-                    <label for="runAnalysis.params.highRangeOperator">High Range </label>
-                    <select id="runAnalysis.params.highRangeOperator">
+                    <label for="gsp-waterfall-high-check">High Range </label>
+                    <select id="gsp-waterfall-high-check" ng-model="runAnalysis.params.highRangeOperator">
                         <option value="&gt;" selected="selected">&gt;</option>
                         <option value="&gt;=">&gt;=</option>
                     </select>
-                    <input id="runAnalysis.params.highRangeValue">
+                    <input id="gsp-waterfall-high-txt-identifier" ng-model="runAnalysis.params.highRangeValue">
                     <br><br>
                 </fieldset>
             </div>

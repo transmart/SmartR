@@ -35,7 +35,6 @@ window.smartRApp.controller('WaterfallController', [
             scriptResults: {}
         };
 
-
         $scope.$watchGroup(['fetch.running', 'fetch.loaded', 'runAnalysis.running'], function(newValues) {
             var fetchRunning = newValues[0],
                 fetchLoaded = newValues[1],
