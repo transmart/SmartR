@@ -155,6 +155,7 @@ window.smartRApp.factory('rServeService', [
             state.currentRequestAbort();
 
             var canceler = $q.defer();
+            console.log(taskData.arguments)
             var runRequest = $http({
                 url: pageInfo.basePath + '/ScriptExecution/run',
                 method: 'POST',
