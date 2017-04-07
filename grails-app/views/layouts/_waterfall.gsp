@@ -54,8 +54,8 @@
                         arguments-to-use="runAnalysis.params"
                         running="runAnalysis.running">
             </run-button>
-%{--            <capture-plot-button filename="waterfall.svg" target="waterfall-plot"></capture-plot-button>
-            <waterfall-plot data="runAnalysis.scriptResults" width="1500" height="1500"></waterfall-plot>--}%
+            <capture-plot-button filename="waterfall.svg" target="waterfall-plot"></capture-plot-button>
+            <waterfall-plot data="runAnalysis.scriptResults" width="1500" height="1500"></waterfall-plot>
         </workflow-tab>
 
     </tab-container>
