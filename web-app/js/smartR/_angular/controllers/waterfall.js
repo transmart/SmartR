@@ -30,7 +30,7 @@ window.smartRApp.controller('WaterfallController', [
                 lowRangeOperator: '<',
                 lowRangeValue: '',
                 highRangeOperator: '>',
-                highRangeValue: '',
+                highRangeValue: ''
             },
             scriptResults: {}
         };

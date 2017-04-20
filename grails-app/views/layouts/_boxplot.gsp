@@ -33,6 +33,8 @@
             <br/>
             <br/>
             <biomarker-selection biomarkers="fetch.selectedBiomarkers"></biomarker-selection>
+
+
             <hr class="sr-divider">
             <fetch-button concept-map="fetch.conceptBoxes"
                           loaded="fetch.loaded"

@@ -68,5 +68,9 @@ modules = {
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'ipaconnector.js']
         // waterfall
         resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'waterfall.js']
+
+        // group_test_for_rnaseq
+        resource url: [plugin: 'smart-r', dir: 'js/smartR/_angular/controllers', file: 'rnaseq.js']
+
     }
 }
