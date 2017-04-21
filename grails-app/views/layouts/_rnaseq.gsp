@@ -6,6 +6,8 @@
         %{-- Fetch Data --}%
         %{--========================================================================================================--}%
         <workflow-tab tab-name="Fetch Data" disabled="fetch.disabled">
+            <label>Drag and drop clinical variables to define multiple groups. Please keep in mind that only one type of variables can be compared, e.g. gender (female) with gender (male); not gender (female) with age (>60)!</label>
+            <br/>
             <concept-box style="display: inline-block"
                          concept-group="fetch.conceptBoxes.highDimensional"
                          type="HD"
@@ -16,9 +18,8 @@
             </concept-box>
             <br/>
             <br/>
-            <label>Drag and drop clinical variables to define multiple groups. Please keep in mind that only one type of variables can be compared, e.g. gender (female) with gender (male); not gender (female) with age (>60)!</label>
-            <br/>
             <label>Please group the RNASeq data by either categorical variables</label>
+            <br/>
             <concept-box style="display: inline-block;"
                          concept-group="fetch.conceptBoxes.cat_grouping"
                          type="LD-categorical"
@@ -29,6 +30,7 @@
             </concept-box>
             <br/>
             <label>Or by a numerical variable with two different ranges</label>
+            <br/>
             <concept-box style="display: inline-block;"
                          concept-group="fetch.conceptBoxes.num_grouping"
                          type="LD-numerical"
@@ -37,7 +39,7 @@
                          label="Numerical Variable"
                          tooltip="Select the same numerical variable with two different ranges that you would like to group your data.">
             </concept-box>
-
+            <br/>
             <fetch-button concept-map="fetch.conceptBoxes"
                           loaded="fetch.loaded"
                           running="fetch.running"
