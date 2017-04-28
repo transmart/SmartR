@@ -89,7 +89,7 @@ class smartRGrailsPlugin {
             if (!remoteScriptDirectory) {
                 remoteScriptDirectory = DEFAULT_REMOTE_RSCRIPTS_DIRECTORY
             }
-            remoteScriptDirectory += config.transmartURL.replaceAll("\\W+", "")
+            remoteScriptDirectory += new Date().getTime()
             constants.remoteScriptDirectoryDir = remoteScriptDirectory
             log.info("Location for R scripts in the Rserve server is ${constants.remoteScriptDirectoryDir}")
 
