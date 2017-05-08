@@ -5,7 +5,7 @@ main <- function(analysis_type = "unpaired_group") {
 #    save(fetch_params, file="/tmp/data/fetch_params.Rda")
 
     if (is.null(fetch_params$assayConstraints)) {
-    stop("No assays satisfy the provided criteria")
+        stop("No assays satisfy the provided criteria")
     }
 
     if (analysis_type=="unpaired_group") {
@@ -85,13 +85,6 @@ main <- function(analysis_type = "unpaired_group") {
         dge 	= estimateCommonDisp(dge)
         print("Estimating tagwise dispersion...")
         dge 	= estimateTagwiseDisp(dge)
-
-        output <- list(
-            plot_title = fetch_params$ontologyTerms$datapoints_n0$fullName,
-            dge = dge
-        )
-
-        print("Done!")
     } else {
         print("Multi group analysis")
         ## conditionsFile 	= read.delim(fileName,header=F,stringsAsFactors=F)
@@ -152,13 +145,13 @@ main <- function(analysis_type = "unpaired_group") {
         dge 	= estimateGLMTrendedDisp(dge,design)
         print("Estimating tagwise dispersion...")
         dge 	= estimateGLMTagwiseDisp(dge,design)
+    }
 
-        output <- list(
+    output <- list(
         plot_title = fetch_params$ontologyTerms$datapoints_n0$fullName,
         dge = dge
-        )
-        print("Done!")
-    }
+    )
+    print("Done!")
 
     toJSON(output)
 }
