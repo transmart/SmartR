@@ -1,3 +1,6 @@
+## If you use SmartR in your publication please cite it:
+https://doi.org/10.1093/bioinformatics/btx137
+
 ###SmartR is a grails plugin seeking to improve the visual analytics of the [tranSMART platform](https://github.com/transmart/transmartApp) by using recent web technologies such as [d3](http://d3js.org/).
 
 [![Heatmap Example](https://i.imgur.com/WGFV2kD.png)](https://youtu.be/Gg0AdYt77Cs)
@@ -32,3 +35,4 @@ SmartR will be included by default. No modification necessary.
 
 #### Wiki
 - https://wiki.transmartfoundation.org/display/transmartwiki/SmartR
+

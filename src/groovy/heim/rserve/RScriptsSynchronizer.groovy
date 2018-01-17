@@ -1,7 +1,6 @@
 package heim.rserve
 
 import com.google.common.base.Charsets
-import com.google.common.util.concurrent.SettableFuture
 import groovy.transform.TypeChecked
 import groovy.util.logging.Log4j
 import heim.SmartRRuntimeConstants
@@ -38,17 +37,15 @@ class RScriptsSynchronizer {
     @Autowired
     private RConnectionProvider rConnectionProvider
 
-    private SettableFuture<Boolean> copyResult = SettableFuture.create()
+    private boolean copySuccessful = false
+    private final Object lock = new Object()
 
     void start() {
         Thread.start('r-scripts-synchronizer') {
             int totalTries = MAX_NUMBER_OF_RETRIES + 1
             while (totalTries-- > 0) {
                 try {
-                    copyFilesOver()
-                    copyResult.set(Boolean.TRUE)
-                    log.info('Finished copying over the smartR scripts to ' +
-                            'the Rserve machine')
+                    ensureScriptsAreCopied()
                     return
                 } catch (Throwable t) {
                     if (t instanceof InterruptedException) {
@@ -62,16 +59,28 @@ class RScriptsSynchronizer {
             }
 
             log.error('Synchronization of R scripts has failed. No more retries')
-            copyResult.set(Boolean.FALSE)
+        }
+    }
+
+    void ensureScriptsAreCopied() {
+        synchronized (lock) {
+            if(!copySuccessful) {
+                try {
+                    copyFilesOver()
+                } catch (Throwable t) {
+                    throw new IllegalStateException("Can't copy the smartR scripts to the Rserver machine", t)
+                }
+                copySuccessful = true
+                log.info('Finished copying over the smartR scripts to the Rserve machine')
+            }
         }
     }
 
     void skip() {
-        copyResult.set(Boolean.TRUE)
-    }
-
-    boolean wasCopySuccessful() {
-        copyResult.get()
+        synchronized (lock) {
+            copySuccessful = true
+            log.info('Skipping on copying over the smartR scripts to the Rserve machine')
+        }
     }
 
     private void copyFilesOver() {

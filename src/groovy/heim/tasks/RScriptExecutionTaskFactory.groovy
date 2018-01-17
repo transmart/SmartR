@@ -55,10 +55,7 @@ class RScriptExecutionTaskFactory implements TaskFactory {
 
     @Override
     Task createTask(String taskName, Map<String, Object> arguments) {
-        if (!rScriptsSynchronizer.wasCopySuccessful()) {
-            throw new IllegalStateException(
-                    "Cannot continue because R scripts were not successfully copied")
-        }
+        rScriptsSynchronizer.ensureScriptsAreCopied()
         try {
             File fileToLoad = calculateRemoteScriptPath(taskName)
 
